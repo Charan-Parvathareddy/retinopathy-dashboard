@@ -1,10 +1,11 @@
 "use client";
 import React, { useState, ChangeEvent } from 'react';
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
+import Image from 'next/image';
 
 interface PatientFormData {
   patient_id: string;
@@ -59,7 +60,7 @@ const getColorForValue = (value: number, isConfidence: boolean, isPredictionClas
 const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
   return (
     <div className="space-y-6">
-      {data.map((item, index) => (
+      {data.map((item) => (
         <div key={item.name} className="relative">
           <div className="flex justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">{item.name}</span>
@@ -153,14 +154,9 @@ export function Analysis() {
   const [apiData, setApiData] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<PatientFormData>({
-    patient_id: '',
-    name: '',
-  });
 
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
-    setFormData(prev => ({ ...prev, patient_id: e.target.value }));
   };
 
   const handleImageUpload = (files: File[], eye: 'left' | 'right') => {
@@ -174,11 +170,6 @@ export function Analysis() {
         setRightEyePreview(URL.createObjectURL(file));
       }
     }
-  };
-
-  const handleFormChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
@@ -196,7 +187,7 @@ export function Analysis() {
     formData.append('right_eye', rightEyeImage);
 
     try {
-      const response = await fetch('http://4.213.205.254:8000/docs/predict', {
+      const response = await fetch('http://4.213.205.254:8000/predict', {
         method: 'POST',
         body: formData,
       });
@@ -234,54 +225,38 @@ export function Analysis() {
                 value={patientId}
                 onChange={handlePatientIdChange}
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block mb-2 font-medium">Left Eye Image</label>
-                  {leftEyePreview ? (
-                    <div className="relative">
-                      <img src={leftEyePreview} alt="Left Eye Preview" className="w-full h-auto rounded-lg" />
-                    </div>
-                  ) : (
-                    <FileUpload onChange={(files) => handleImageUpload(files, 'left')} />
-                  )}
-                </div>
-                <div>
-                  <label className="block mb-2 font-medium">Right Eye Image</label>
-                  {rightEyePreview ? (
-                    <div className="relative">
-                      <img src={rightEyePreview} alt="Right Eye Preview" className="w-full h-auto rounded-lg" />
-                    </div>
-                  ) : (
-                    <FileUpload onChange={(files) => handleImageUpload(files, 'right')} />
-                  )}
-                </div>
+              <div className="space-y-2">
+                <FileUpload
+                  onUpload={(files) => handleImageUpload(files, 'left')}
+                  label="Left Eye Image"
+                />
+                {leftEyePreview && (
+                  <Image src={leftEyePreview} alt="Left Eye Preview" width={100} height={100} />
+                )}
               </div>
-              <Button onClick={handleSubmit} disabled={isLoading} className="w-full">
-                {isLoading ? 'Processing...' : 'Analyze'}
-              </Button>
+              <div className="space-y-2">
+                <FileUpload
+                  onUpload={(files) => handleImageUpload(files, 'right')}
+                  label="Right Eye Image"
+                />
+                {rightEyePreview && (
+                  <Image src={rightEyePreview} alt="Right Eye Preview" width={100} height={100} />
+                )}
+              </div>
             </CardContent>
+            <CardFooter>
+              <Button onClick={handleSubmit} disabled={isLoading}>
+                {isLoading ? 'Analyzing...' : 'Submit'}
+              </Button>
+              {error && <div className="text-red-500 mt-2">{error}</div>}
+            </CardFooter>
           </Card>
 
-          {error && (
-            <Card className="mb-8 bg-red-50 border-red-200">
-              <CardContent className="p-4">
-                <p className="text-red-600">{error}</p>
-              </CardContent>
-            </Card>
-          )}
-
           {apiData && (
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">Analysis Results</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <EyeAnalysisCard eye="Left" data={apiData.left_eye_result} />
-                  <EyeAnalysisCard eye="Right" data={apiData.right_eye_result} />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              <EyeAnalysisCard eye="Left" data={apiData.left_eye_result} />
+              <EyeAnalysisCard eye="Right" data={apiData.right_eye_result} />
+            </div>
           )}
         </div>
       </div>
