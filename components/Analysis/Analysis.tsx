@@ -6,21 +6,25 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ApiResponse {
   patient_id: string;
-  right_eye_result: EyeResult;
-  left_eye_result: EyeResult;
-}
-
-interface EyeResult {
-  predicted_class: number;
-  Stage: string;
-  confidence: string;
-  explanation: string;
-  warning: string | null;
-  Risk_Factor: string;
+  right_eye_result: {
+    predicted_class: number;
+    Stage: string;
+    confidence: string;
+    explanation: string;
+    warning: string | null;
+    Risk_Factor: string;
+  };
+  left_eye_result: {
+    predicted_class: number;
+    Stage: string;
+    confidence: string;
+    explanation: string;
+    warning: string | null;
+    Risk_Factor: string;
+  };
 }
 
 interface ChartDataItem {
@@ -81,7 +85,7 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
   );
 };
 
-const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
+const EyeAnalysisCard = ({ eye, data }: { eye: string; data: ApiResponse['right_eye_result'] | ApiResponse['left_eye_result'] }) => {
   const { Stage, confidence, explanation, Risk_Factor, predicted_class } = data;
   const chartData: ChartDataItem[] = [
     {
@@ -153,16 +157,12 @@ export function Analysis() {
   const handleImageUpload = (files: File[], eye: 'left' | 'right') => {
     if (files.length > 0) {
       const file = files[0];
-      if (file.type.startsWith('image/')) {
-        if (eye === 'left') {
-          setLeftEyeImage(file);
-          setLeftEyePreview(URL.createObjectURL(file));
-        } else {
-          setRightEyeImage(file);
-          setRightEyePreview(URL.createObjectURL(file));
-        }
+      if (eye === 'left') {
+        setLeftEyeImage(file);
+        setLeftEyePreview(URL.createObjectURL(file));
       } else {
-        setError(`Please upload a valid image file for the ${eye} eye.`);
+        setRightEyeImage(file);
+        setRightEyePreview(URL.createObjectURL(file));
       }
     }
   };
@@ -182,37 +182,24 @@ export function Analysis() {
     formData.append('right_eye', rightEyeImage);
 
     try {
+      // Update the URL to use HTTPS
       const response = await fetch('https://gnayan-huf2h0hjfxb3efg7.southindia-01.azurewebsites.net/predict', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Network response was not ok');
       }
 
       const data: ApiResponse = await response.json();
       setApiData(data);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(`An error occurred: ${err.message}`);
-      } else {
-        setError('An unknown error occurred. Please try again.');
-      }
+      setError('An error occurred while processing your request. Please try again.');
       console.error('Error:', err);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleClear = () => {
-    setPatientId('');
-    setLeftEyeImage(null);
-    setRightEyeImage(null);
-    setLeftEyePreview(null);
-    setRightEyePreview(null);
-    setApiData(null);
-    setError(null);
   };
 
   return (
@@ -238,8 +225,6 @@ export function Analysis() {
                 <p className="text-sm font-medium text-gray-700">Left Eye Image</p>
                 <FileUpload
                   onChange={(files) => handleImageUpload(files, 'left')}
-                  accept="image/*"
-                  aria-label="Upload left eye image"
                 />
                 {leftEyePreview && (
                   <Image src={leftEyePreview} alt="Left Eye Preview" width={100} height={100} />
@@ -249,8 +234,6 @@ export function Analysis() {
                 <p className="text-sm font-medium text-gray-700">Right Eye Image</p>
                 <FileUpload
                   onChange={(files) => handleImageUpload(files, 'right')}
-                  accept="image/*"
-                  aria-label="Upload right eye image"
                 />
                 {rightEyePreview && (
                   <Image src={rightEyePreview} alt="Right Eye Preview" width={100} height={100} />
@@ -258,20 +241,12 @@ export function Analysis() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={handleSubmit} disabled={isLoading} className="mr-4">
+              <Button onClick={handleSubmit} disabled={isLoading}>
                 {isLoading ? 'Analyzing...' : 'Submit'}
               </Button>
-              <Button onClick={handleClear} variant="outline">
-                Clear
-              </Button>
+              {error && <div className="text-red-500 mt-2">{error}</div>}
             </CardFooter>
           </Card>
-
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
 
           {apiData && (
             <div className="space-y-6">
