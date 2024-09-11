@@ -221,18 +221,18 @@ export function Analysis() {
                 onChange={handlePatientIdChange}
               />
               <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">Left Eye Image</p>
                 <FileUpload
                   onChange={(files) => handleImageUpload(files, 'left')}
-                  label="Left Eye Image"
                 />
                 {leftEyePreview && (
                   <Image src={leftEyePreview} alt="Left Eye Preview" width={100} height={100} />
                 )}
               </div>
               <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">Right Eye Image</p>
                 <FileUpload
                   onChange={(files) => handleImageUpload(files, 'right')}
-                  label="Right Eye Image"
                 />
                 {rightEyePreview && (
                   <Image src={rightEyePreview} alt="Right Eye Preview" width={100} height={100} />
