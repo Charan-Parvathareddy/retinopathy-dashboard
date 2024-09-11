@@ -7,11 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
 
-interface PatientFormData {
-  patient_id: string;
-  name: string;
-}
-
 interface ApiResponse {
   patient_id: string;
   right_eye_result: {
