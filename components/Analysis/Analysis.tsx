@@ -182,7 +182,7 @@ export function Analysis() {
     formData.append('right_eye', rightEyeImage);
 
     try {
-      const response = await fetch('http://4.224.118.80:8000/predict', {
+      const response = await fetch('https://gnayan-huf2h0hjfxb3efg7.southindia-01.azurewebsites.net/predict', {
         method: 'POST',
         body: formData,
       });
