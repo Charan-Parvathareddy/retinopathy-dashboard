@@ -6,25 +6,21 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ApiResponse {
   patient_id: string;
-  right_eye_result: {
-    predicted_class: number;
-    Stage: string;
-    confidence: string;
-    explanation: string;
-    warning: string | null;
-    Risk_Factor: string;
-  };
-  left_eye_result: {
-    predicted_class: number;
-    Stage: string;
-    confidence: string;
-    explanation: string;
-    warning: string | null;
-    Risk_Factor: string;
-  };
+  right_eye_result: EyeResult;
+  left_eye_result: EyeResult;
+}
+
+interface EyeResult {
+  predicted_class: number;
+  Stage: string;
+  confidence: string;
+  explanation: string;
+  warning: string | null;
+  Risk_Factor: string;
 }
 
 interface ChartDataItem {
@@ -85,7 +81,7 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
   );
 };
 
-const EyeAnalysisCard = ({ eye, data }: { eye: string; data: ApiResponse['right_eye_result'] | ApiResponse['left_eye_result'] }) => {
+const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
   const { Stage, confidence, explanation, Risk_Factor, predicted_class } = data;
   const chartData: ChartDataItem[] = [
     {
@@ -157,12 +153,16 @@ export function Analysis() {
   const handleImageUpload = (files: File[], eye: 'left' | 'right') => {
     if (files.length > 0) {
       const file = files[0];
-      if (eye === 'left') {
-        setLeftEyeImage(file);
-        setLeftEyePreview(URL.createObjectURL(file));
+      if (file.type.startsWith('image/')) {
+        if (eye === 'left') {
+          setLeftEyeImage(file);
+          setLeftEyePreview(URL.createObjectURL(file));
+        } else {
+          setRightEyeImage(file);
+          setRightEyePreview(URL.createObjectURL(file));
+        }
       } else {
-        setRightEyeImage(file);
-        setRightEyePreview(URL.createObjectURL(file));
+        setError(`Please upload a valid image file for the ${eye} eye.`);
       }
     }
   };
@@ -188,17 +188,31 @@ export function Analysis() {
       });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data: ApiResponse = await response.json();
       setApiData(data);
     } catch (err) {
-      setError('An error occurred while processing your request. Please try again.');
+      if (err instanceof Error) {
+        setError(`An error occurred: ${err.message}`);
+      } else {
+        setError('An unknown error occurred. Please try again.');
+      }
       console.error('Error:', err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleClear = () => {
+    setPatientId('');
+    setLeftEyeImage(null);
+    setRightEyeImage(null);
+    setLeftEyePreview(null);
+    setRightEyePreview(null);
+    setApiData(null);
+    setError(null);
   };
 
   return (
@@ -224,6 +238,8 @@ export function Analysis() {
                 <p className="text-sm font-medium text-gray-700">Left Eye Image</p>
                 <FileUpload
                   onChange={(files) => handleImageUpload(files, 'left')}
+                  accept="image/*"
+                  aria-label="Upload left eye image"
                 />
                 {leftEyePreview && (
                   <Image src={leftEyePreview} alt="Left Eye Preview" width={100} height={100} />
@@ -233,6 +249,8 @@ export function Analysis() {
                 <p className="text-sm font-medium text-gray-700">Right Eye Image</p>
                 <FileUpload
                   onChange={(files) => handleImageUpload(files, 'right')}
+                  accept="image/*"
+                  aria-label="Upload right eye image"
                 />
                 {rightEyePreview && (
                   <Image src={rightEyePreview} alt="Right Eye Preview" width={100} height={100} />
@@ -240,12 +258,20 @@ export function Analysis() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={handleSubmit} disabled={isLoading}>
+              <Button onClick={handleSubmit} disabled={isLoading} className="mr-4">
                 {isLoading ? 'Analyzing...' : 'Submit'}
               </Button>
-              {error && <div className="text-red-500 mt-2">{error}</div>}
+              <Button onClick={handleClear} variant="outline">
+                Clear
+              </Button>
             </CardFooter>
           </Card>
+
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           {apiData && (
             <div className="space-y-6">
