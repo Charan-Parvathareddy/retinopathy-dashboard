@@ -182,7 +182,7 @@ export function Analysis() {
     formData.append('right_eye', rightEyeImage);
 
     try {
-      const response = await fetch('http://4.213.205.254:8000/predict', {
+      const response = await fetch('http://4.224.118.80:8000/predict', {
         method: 'POST',
         body: formData,
       });
