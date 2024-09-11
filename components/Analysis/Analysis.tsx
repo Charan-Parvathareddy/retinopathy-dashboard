@@ -222,7 +222,7 @@ export function Analysis() {
               />
               <div className="space-y-2">
                 <FileUpload
-                  onUpload={(files) => handleImageUpload(files, 'left')}
+                  onChange={(files) => handleImageUpload(files, 'left')}
                   label="Left Eye Image"
                 />
                 {leftEyePreview && (
@@ -231,7 +231,7 @@ export function Analysis() {
               </div>
               <div className="space-y-2">
                 <FileUpload
-                  onUpload={(files) => handleImageUpload(files, 'right')}
+                  onChange={(files) => handleImageUpload(files, 'right')}
                   label="Right Eye Image"
                 />
                 {rightEyePreview && (
