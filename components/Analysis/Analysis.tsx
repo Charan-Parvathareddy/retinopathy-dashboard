@@ -8,24 +8,19 @@ import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
 
+
+interface EyeResult {
+  predicted_class: number;
+  stage: string;
+  confidence: string;
+  explanation: string;
+  Note: string | null;
+  Risk: string;
+}
+
 interface ApiResponse {
-  patient_id: string;
-  right_eye_result: {
-    predicted_class: number;
-    Stage: string;
-    confidence: string;
-    explanation: string;
-    warning: string | null;
-    Risk_Factor: string;
-  };
-  left_eye_result: {
-    predicted_class: number;
-    Stage: string;
-    confidence: string;
-    explanation: string;
-    warning: string | null;
-    Risk_Factor: string;
-  };
+  left_image_result: EyeResult;
+  right_image_result: EyeResult;
 }
 
 interface ChartDataItem {
@@ -86,13 +81,13 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
   );
 };
 
-const EyeAnalysisCard = ({ eye, data }: { eye: string; data: ApiResponse['right_eye_result'] | ApiResponse['left_eye_result'] }) => {
-  const { Stage, confidence, explanation, Risk_Factor, predicted_class } = data;
+const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
+  const { stage, confidence, explanation, Risk, predicted_class } = data;
   const chartData: ChartDataItem[] = [
     {
       name: 'Risk',
-      value: parseFloat(Risk_Factor),
-      displayValue: Risk_Factor,
+      value: parseFloat(Risk.replace('%', '')),
+      displayValue: Risk,
       markers: [
         { position: 33, label: 'Low' },
         { position: 66, label: 'Medium' },
@@ -101,7 +96,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: ApiResponse['right_
     },
     {
       name: 'Confidence',
-      value: parseFloat(confidence),
+      value: parseFloat(confidence.replace('%', '')),
       displayValue: confidence,
       markers: [
         { position: 33, label: 'Low' },
@@ -113,7 +108,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: ApiResponse['right_
     {
       name: 'Prediction Class',
       value: predicted_class,
-      displayValue: Stage,
+      displayValue: stage,
       markers: [
         { position: 33, label: 'No DR' },
         { position: 66, label: 'Moderate' },
@@ -128,18 +123,20 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: ApiResponse['right_
       <CardHeader>
         <CardTitle className="text-2xl font-bold mb-2">{eye} Eye Analysis</CardTitle>
         <Separator className="my-3" />
-        <CardDescription className="text-lg mt-3 font-medium">{Stage}: {explanation}</CardDescription>
+        <CardDescription className="text-lg mt-3 font-medium">{stage}: {explanation}</CardDescription>
       </CardHeader>
       <CardContent className="pt-4">
         <CustomBarChart data={chartData} />
       </CardContent>
       <CardFooter className="flex flex-col items-start border-t p-4">
         <div className="text-sm font-medium mb-1">Note:</div>
-        <div className="text-sm text-muted-foreground">{data.warning}</div>
+        <div className="text-sm text-muted-foreground">{data.Note}</div>
       </CardFooter>
     </Card>
   );
 };
+
+
 
 export function Analysis() {
   const [patientId, setPatientId] = useState<string>('');
@@ -150,7 +147,6 @@ export function Analysis() {
   const [apiData, setApiData] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
   };
@@ -189,78 +185,85 @@ export function Analysis() {
       });
   
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        const errorBody = await response.text();
+        console.error('Error response:', errorBody);
+        throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
       }
   
       const data: ApiResponse = await response.json();
       setApiData(data);
-    } catch (err) {
-      setError('An error occurred while processing your request. Please try again.');
-      console.error('Error:', err);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(`An error occurred while processing your request: ${error.message}`);
+        console.error('Error:', error);
+      } else {
+        setError('An unknown error occurred');
+        console.error('Unknown error:', error);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <>
-    <Head>
+      <Head>
         <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
       </Head>
-    <div className="flex min-h-screen w-full flex-col bg-gray-50">
-      <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-6 shadow-sm z-50">
-        <h1 className="text-2xl font-bold">Diabetic Retinopathy Analysis</h1>
-      </header>
-      
-      <div className="flex-1 p-6">
-        <div className="max-w-4xl mx-auto">
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold">Patient Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Input
-                type="text"
-                placeholder="Patient ID"
-                value={patientId}
-                onChange={handlePatientIdChange}
-              />
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">Left Eye Image</p>
-                <FileUpload
-                  onChange={(files) => handleImageUpload(files, 'left')}
+      <div className="flex min-h-screen w-full flex-col bg-gray-50">
+        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-6 shadow-sm z-50">
+          <h1 className="text-2xl font-bold">Diabetic Retinopathy Analysis</h1>
+        </header>
+        
+        <div className="flex-1 p-6">
+          <div className="max-w-4xl mx-auto">
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">Patient Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input
+                  type="text"
+                  placeholder="Patient ID"
+                  value={patientId}
+                  onChange={handlePatientIdChange}
                 />
-                {leftEyePreview && (
-                  <Image src={leftEyePreview} alt="Left Eye Preview" width={100} height={100} />
-                )}
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">Right Eye Image</p>
-                <FileUpload
-                  onChange={(files) => handleImageUpload(files, 'right')}
-                />
-                {rightEyePreview && (
-                  <Image src={rightEyePreview} alt="Right Eye Preview" width={100} height={100} />
-                )}
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleSubmit} disabled={isLoading}>
-                {isLoading ? 'Analyzing...' : 'Submit'}
-              </Button>
-              {error && <div className="text-red-500 mt-2">{error}</div>}
-            </CardFooter>
-          </Card>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-700">Left Eye Image</p>
+                  <FileUpload
+                    onChange={(files) => handleImageUpload(files, 'left')}
+                  />
+                  {leftEyePreview && (
+                    <Image src={leftEyePreview} alt="Left Eye Preview" width={100} height={100} />
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-700">Right Eye Image</p>
+                  <FileUpload
+                    onChange={(files) => handleImageUpload(files, 'right')}
+                  />
+                  {rightEyePreview && (
+                    <Image src={rightEyePreview} alt="Right Eye Preview" width={100} height={100} />
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleSubmit} disabled={isLoading}>
+                  {isLoading ? 'Analyzing...' : 'Submit'}
+                </Button>
+                {error && <div className="text-red-500 mt-2">{error}</div>}
+              </CardFooter>
+            </Card>
 
-          {apiData && (
-            <div className="space-y-6">
-              <EyeAnalysisCard eye="Left" data={apiData.left_eye_result} />
-              <EyeAnalysisCard eye="Right" data={apiData.right_eye_result} />
-            </div>
-          )}
+            {apiData && (
+              <div className="space-y-6">
+                <EyeAnalysisCard eye="Left" data={apiData.left_image_result} />
+                <EyeAnalysisCard eye="Right" data={apiData.right_image_result} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
-  
 }
