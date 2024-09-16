@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
-import { ArrowRight, Eye, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ArrowRight, Eye, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface EyeResult {
