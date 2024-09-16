@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, ChangeEvent } from 'react';
+import Head from 'next/head';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -172,26 +173,25 @@ export function Analysis() {
       setError('Please fill in all fields and upload both eye images.');
       return;
     }
-
+  
     setIsLoading(true);
     setError(null);
-
+  
     const formData = new FormData();
     formData.append('patient_id', patientId);
-    formData.append('left_eye', leftEyeImage);
-    formData.append('right_eye', rightEyeImage);
-
+    formData.append('left_image', leftEyeImage);
+    formData.append('right_image', rightEyeImage);
+  
     try {
-      // Update the URL to use HTTPS
-      const response = await fetch('https://gnayan-huf2h0hjfxb3efg7.southindia-01.azurewebsites.net/predict', {
+      const response = await fetch('https://gnayan-huf2h0hjfxb3efg7.southindia-01.azurewebsites.net/predict/', {
         method: 'POST',
         body: formData,
       });
-
+  
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-
+  
       const data: ApiResponse = await response.json();
       setApiData(data);
     } catch (err) {
@@ -201,8 +201,11 @@ export function Analysis() {
       setIsLoading(false);
     }
   };
-
   return (
+    <>
+    <Head>
+        <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+      </Head>
     <div className="flex min-h-screen w-full flex-col bg-gray-50">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-6 shadow-sm z-50">
         <h1 className="text-2xl font-bold">Diabetic Retinopathy Analysis</h1>
@@ -258,4 +261,5 @@ export function Analysis() {
       </div>
     </div>
   );
+  </>
 }
