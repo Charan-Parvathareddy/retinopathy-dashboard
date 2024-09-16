@@ -23,8 +23,8 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (
-      username === "iscs" &&
-      password === "iscs@retinopathy"
+      username === process.env.NEXT_PUBLIC_USERNAME &&
+      password === process.env.NEXT_PUBLIC_PASSPHRASE
     ) {
       localStorage.setItem('isLoggedIn', 'true')
       router.push("/Analysis")
