@@ -260,6 +260,7 @@ export function Analysis() {
         </div>
       </div>
     </div>
+    </>
   );
-  </>
+  
 }
