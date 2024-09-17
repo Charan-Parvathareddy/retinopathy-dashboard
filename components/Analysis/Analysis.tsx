@@ -239,40 +239,49 @@ export function Analysis() {
                   onChange={handlePatientIdChange}
                   className="border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500"
                 />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <p className="text-sm font-bold text-gray-700">Left Eye Image</p>
-                    <FileUpload
-                      onChange={(files) => handleImageUpload(files, 'left')}
-                    />
-                    {leftEyePreview && (
-                      <motion.div 
-                        className="mt-2 rounded-lg overflow-hidden shadow-md"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Image src={leftEyePreview} alt="Left Eye Preview" width={150} height={150} objectFit="cover" />
-                      </motion.div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm font-bold text-gray-700">Right Eye Image</p>
-                    <FileUpload
-                      onChange={(files) => handleImageUpload(files, 'right')}
-                    />
-                    {rightEyePreview && (
-                      <motion.div 
-                        className="mt-2 rounded-lg overflow-hidden shadow-md"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Image src={rightEyePreview} alt="Right Eye Preview" width={150} height={150} objectFit="cover" />
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div className="space-y-2">
+    <p className="text-sm font-bold text-gray-700">Left Eye Image</p>
+    <FileUpload onChange={(files) => handleImageUpload(files, 'left')} />
+    {leftEyePreview && (
+      <motion.div 
+        className="mt-2 flex items-center justify-center"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Image
+          src={leftEyePreview}
+          alt="Left Eye Preview"
+          width={150}
+          height={150}
+          className="object-cover"
+        />
+      </motion.div>
+    )}
+  </div>
+  <div className="space-y-2">
+    <p className="text-sm font-bold text-gray-700">Right Eye Image</p>
+    <FileUpload onChange={(files) => handleImageUpload(files, 'right')} />
+    {rightEyePreview && (
+      <motion.div 
+        className="mt-2 flex items-center justify-center"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Image
+          src={rightEyePreview}
+          alt="Right Eye Preview"
+          width={150}
+          height={150}
+          className="object-cover"
+        />
+      </motion.div>
+    )}
+  </div>
+</div>
+
               </CardContent>
               <CardFooter className="bg-gray-50 p-4 flex flex-col items-center">
   <Button 
