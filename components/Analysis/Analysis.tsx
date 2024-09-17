@@ -148,6 +148,26 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
   );
 };
 
+
+const Sparkles = () => {
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      <div className="w-px h-full absolute left-1/2 -translate-x-1/2 bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move">
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2 h-2 bg-cyan-500 rounded-full animate-sparkle"
+            style={{
+              top: `${i * 25}%`,
+              animationDelay: `${i * 0.2}s`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export function Analysis() {
   const [patientId, setPatientId] = useState<string>('');
   const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
@@ -162,9 +182,8 @@ export function Analysis() {
     setPatientId(e.target.value);
   };
 
-  const handleImageUpload = (files: File[], eye: 'left' | 'right') => {
-    if (files.length > 0) {
-      const file = files[0];
+  const handleImageUpload = (file: File | null, eye: 'left' | 'right') => {
+    if (file) {
       if (eye === 'left') {
         setLeftEyeImage(file);
         setLeftEyePreview(URL.createObjectURL(file));
@@ -185,7 +204,6 @@ export function Analysis() {
     setError(null);
   
     const formData = new FormData();
-    
     formData.append('left_image', leftEyeImage);
     formData.append('right_image', rightEyeImage);
   
@@ -195,8 +213,6 @@ export function Analysis() {
         body: formData,
       });
       if (!response.ok) {
-        const errorBody = await response.text();
-        console.error('Error response:', errorBody);
         throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
       }
   
@@ -205,11 +221,10 @@ export function Analysis() {
     } catch (error) {
       if (error instanceof Error) {
         setError(`An error occurred while processing your request: ${error.message}`);
-        console.error('Error:', error);
       } else {
         setError('An unknown error occurred');
-        console.error('Unknown error:', error);
       }
+      console.error('Error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -220,16 +235,12 @@ export function Analysis() {
       <Head>
         <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
       </Head>
-      <div className="flex min-h-screen w-full flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
-        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-6 shadow-sm z-50">
-          <h1 className="text-2xl font-bold ">Diabetic Retinopathy Analysis</h1>
-        </header>
-        
+      <div className="h-[50rem] w-full dark:bg-black bg-white dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative flex items-center justify-center">
         <div className="flex-1 p-6">
           <div className="max-w-4xl mx-auto">
             <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader className="bg-gradient">
-                <CardTitle className="text-xl font-semibold">Patient Information</CardTitle>
+                <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 p-6">
                 <Input
@@ -237,72 +248,74 @@ export function Analysis() {
                   placeholder="Patient ID"
                   value={patientId}
                   onChange={handlePatientIdChange}
-                  className="border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500"
+                  className="w-full border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500"
                 />
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  <div className="space-y-2">
-    <p className="text-sm font-bold text-gray-700">Left Eye Image</p>
-    <FileUpload onChange={(files) => handleImageUpload(files, 'left')} />
-    {leftEyePreview && (
-      <motion.div 
-        className="mt-2 flex items-center justify-center"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Image
-          src={leftEyePreview}
-          alt="Left Eye Preview"
-          width={150}
-          height={150}
-          className="object-cover"
-        />
-      </motion.div>
-    )}
-  </div>
-  <div className="space-y-2">
-    <p className="text-sm font-bold text-gray-700">Right Eye Image</p>
-    <FileUpload onChange={(files) => handleImageUpload(files, 'right')} />
-    {rightEyePreview && (
-      <motion.div 
-        className="mt-2 flex items-center justify-center"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Image
-          src={rightEyePreview}
-          alt="Right Eye Preview"
-          width={150}
-          height={150}
-          className="object-cover"
-        />
-      </motion.div>
-    )}
-  </div>
-</div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <p className="text-sm font-bold text-gray-700">Left Eye Image</p>
+                    <FileUpload onChange={(file) => handleImageUpload(file, 'left')} />
+                    {leftEyePreview && (
+                      <motion.div 
+                        className="mt-2 flex items-center justify-center relative overflow-hidden"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Image
+                          src={leftEyePreview}
+                          alt="Left Eye Preview"
+                          width={150}
+                          height={150}
+                          className="object-cover"
+                        />
+                        {isLoading && <Sparkles />}
+                      </motion.div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-bold text-gray-700">Right Eye Image</p>
+                    <FileUpload onChange={(file) => handleImageUpload(file, 'right')} />
+                    {rightEyePreview && (
+                      <motion.div 
+                        className="mt-2 flex items-center justify-center relative overflow-hidden"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Image
+                          src={rightEyePreview}
+                          alt="Right Eye Preview"
+                          width={150}
+                          height={150}
+                          className="object-cover"
+                        />
+                        {isLoading && <Sparkles />}
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
               </CardContent>
               <CardFooter className="bg-gray-50 p-4 flex flex-col items-center">
-  <Button 
-    onClick={handleSubmit} 
-    disabled={isLoading}
-    className=" hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center"
-  >
-    {isLoading ? 'Analyzing...' : 'Submit Analysis'}
-    {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
-  </Button>
-  {error && (
-    <motion.div 
-      className="text-red-500 mt-2 flex items-center"
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <AlertTriangle className="mr-2" /> {error}
-    </motion.div>
-  )}
-</CardFooter>
+                <Button 
+                  onClick={handleSubmit} 
+                  disabled={isLoading}
+                  className="hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center"
+                >
+                  {isLoading ? 'Analyzing...' : 'Submit Analysis'}
+                  {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+                {error && (
+                  <motion.div 
+                    className="text-red-500 mt-2 flex items-center"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <AlertTriangle className="mr-2" /> {error}
+                  </motion.div>
+                )}
+              </CardFooter>
             </Card>
 
             {apiData && (

@@ -16,13 +16,14 @@ const mainVariant = {
   },
 };
 
-export const FileUpload = ({ onChange }: { onChange?: (files: File[]) => void }) => {
-  const [files, setFiles] = useState<File[]>([]);
+export const FileUpload = ({ onChange }: { onChange?: (file: File | null) => void }) => {
+  const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (newFiles: File[]) => {
-    setFiles(newFiles);
-    onChange && onChange(newFiles);
+    const newFile = newFiles[0] || null;
+    setFile(newFile);
+    onChange && onChange(newFile);
   };
 
   const handleClick = () => {
@@ -56,19 +57,24 @@ export const FileUpload = ({ onChange }: { onChange?: (files: File[]) => void })
           <GridPattern />
         </div>
         <div className="flex flex-col items-center justify-center">
-          {/* Conditionally render text only if no files are uploaded */}
-          {!files.length && (
+          {!file && (
             <>
               <p className="relative z-20 font-sans font-bold text-neutral-700 dark:text-neutral-300 text-base">
                 Upload file
               </p>
               <p className="relative z-20 font-sans font-normal text-neutral-400 dark:text-neutral-400 text-base mt-2">
-                Drag or drop your files here or click to upload
+                Drag or drop your file here or click to upload
               </p>
             </>
           )}
 
-          {!files.length && (
+          {file && (
+            <p className="relative z-20 font-sans font-normal text-neutral-700 dark:text-neutral-300 text-base">
+              {file.name}
+            </p>
+          )}
+
+          {!file && (
             <motion.div
               layoutId="file-upload"
               variants={mainVariant}
