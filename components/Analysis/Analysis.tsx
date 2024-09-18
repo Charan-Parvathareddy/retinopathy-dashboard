@@ -285,7 +285,7 @@ const SVGLineGlowAnimate: React.FC<SVGLineGlowAnimateProps> = ({
 const GlowingLineGrid = () => {
   return (
     <div className="absolute inset-0 z-20 pointer-events-none">
-      <div className="w-full h-full grid grid-cols-4 grid-rows-2">
+      <div className="w-full h-full grid grid-cols-8 grid-rows-8">
         {[...Array(8)].map((_, index) => (
           <div key={index} className="flex items-center justify-center">
             <SVGLineGlowAnimate 
