@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import Head from 'next/head';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
 import { ArrowRight, Eye, AlertTriangle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface EyeResult {
   predicted_class: number;
@@ -151,6 +151,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
     </Card>
   );
 };
+
 
 const START_GRADIENT_POSITION = -130;
 const END_GRADIENT_POSITION = 210;
@@ -301,12 +302,30 @@ const GlowingLineGrid = () => {
 };
 
 const DistortedGlass = () => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsVisible((prev) => !prev);
+    }, isVisible ? 5000 : 2000);
+
+    return () => clearInterval(interval);
+  }, [isVisible]);
+
   return (
-    <>
-      <div className="absolute inset-0 z-10 overflow-hidden">
-        <div className="glass-effect h-full w-full" />
-      </div>
-      <GlowingLineGrid />
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="absolute inset-0 z-10 overflow-hidden"
+        >
+          <div className="glass-effect h-full w-full" />
+          <GlowingLineGrid />
+        </motion.div>
+      )}
       <svg className="hidden">
         <defs>
           <filter id="fractal-noise-glass">
@@ -340,22 +359,44 @@ const DistortedGlass = () => {
           backdrop-filter: blur(3px);
         }
       `}</style>
-    </>
+    </AnimatePresence>
   );
 };
 
+const MovingImage = ({ src, alt }: { src: string; alt: string }) => {
+  return (
+    <motion.div
+      className="relative w-[150px] h-[150px] overflow-hidden"
+      initial={{ x: 0 }}
+      animate={{ x: [0, 10, -10, 0] }}
+      transition={{ 
+        repeat: Infinity, 
+        duration: 4, 
+        ease: "easeInOut" 
+      }}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        layout="fill"
+        objectFit="cover"
+        className="absolute top-0 left-0"
+      />
+    </motion.div>
+  );
+};
 
 export function Analysis() {
-    const [patientId, setPatientId] = useState<string>('');
-    const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
-    const [rightEyeImage, setRightEyeImage] = useState<File | null>(null);
-    const [leftEyePreview, setLeftEyePreview] = useState<string | null>(null);
-    const [rightEyePreview, setRightEyePreview] = useState<string | null>(null);
-    const [apiData, setApiData] = useState<ApiResponse | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
-    const [showInputCard, setShowInputCard] = useState<boolean>(true);
-  
+  const [patientId, setPatientId] = useState<string>('');
+  const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
+  const [rightEyeImage, setRightEyeImage] = useState<File | null>(null);
+  const [leftEyePreview, setLeftEyePreview] = useState<string | null>(null);
+  const [rightEyePreview, setRightEyePreview] = useState<string | null>(null);
+  const [apiData, setApiData] = useState<ApiResponse | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showInputCard, setShowInputCard] = useState<boolean>(true);
+
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
   };
@@ -436,42 +477,20 @@ export function Analysis() {
                       <p className="text-sm font-bold text-gray-700">Left Eye Image</p>
                       <FileUpload onChange={(file) => handleImageUpload(file, 'left')} />
                       {leftEyePreview && (
-                        <motion.div 
-                          className="mt-2 flex items-center justify-center relative overflow-hidden"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <Image
-                            src={leftEyePreview}
-                            alt="Left Eye Preview"
-                            width={150}
-                            height={150}
-                            className="object-cover"
-                          />
+                        <div className="mt-2 flex items-center justify-center relative overflow-hidden">
+                          <MovingImage src={leftEyePreview} alt="Left Eye Preview" />
                           {isLoading && <DistortedGlass />}
-                        </motion.div>
+                        </div>
                       )}
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm font-bold text-gray-700">Right Eye Image</p>
                       <FileUpload onChange={(file) => handleImageUpload(file, 'right')} />
                       {rightEyePreview && (
-                        <motion.div 
-                          className="mt-2 flex items-center justify-center relative overflow-hidden"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <Image
-                            src={rightEyePreview}
-                            alt="Right Eye Preview"
-                            width={150}
-                            height={150}
-                            className="object-cover"
-                          />
+                        <div className="mt-2 flex items-center justify-center relative overflow-hidden">
+                          <MovingImage src={rightEyePreview} alt="Right Eye Preview" />
                           {isLoading && <DistortedGlass />}
-                        </motion.div>
+                        </div>
                       )}
                     </div>
                   </div>
