@@ -152,36 +152,61 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
   );
 };
 
-const Sparkles = () => {
+const DistortedGlass = () => {
   return (
-    <div className="absolute inset-0 pointer-events-none">
-      <div className="w-px h-full absolute left-1/2 -translate-x-1/2 bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-cyan-500 rounded-full animate-sparkle"
-            style={{
-              top: `${i * 25}%`,
-              animationDelay: `${i * 0.2}s`,
-            }}
-          />
-        ))}
+    <>
+      <div className="absolute inset-0 z-10 overflow-hidden">
+        <div className="glass-effect h-full w-full" />
       </div>
-    </div>
+      <svg className="hidden">
+        <defs>
+          <filter id="fractal-noise-glass">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.12 0.12"
+              numOctaves="1"
+              result="warp"
+            />
+            <feDisplacementMap
+              xChannelSelector="R"
+              yChannelSelector="G"
+              scale="30"
+              in="SourceGraphic"
+              in2="warp"
+            />
+          </filter>
+        </defs>
+      </svg>
+      <style jsx>{`
+        .glass-effect {
+          background: rgba(0, 0, 0, 0.2);
+          background: repeating-radial-gradient(
+            circle at 50% 50%,
+            rgb(255 255 255 / 0),
+            rgba(255, 255, 255, 0.2) 10px,
+            rgb(255 255 255) 31px
+          );
+          filter: url(#fractal-noise-glass);
+          background-size: 6px 6px;
+          backdrop-filter: blur(3px);
+        }
+      `}</style>
+    </>
   );
 };
 
-export function Analysis() {
-  const [patientId, setPatientId] = useState<string>('');
-  const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
-  const [rightEyeImage, setRightEyeImage] = useState<File | null>(null);
-  const [leftEyePreview, setLeftEyePreview] = useState<string | null>(null);
-  const [rightEyePreview, setRightEyePreview] = useState<string | null>(null);
-  const [apiData, setApiData] = useState<ApiResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showInputCard, setShowInputCard] = useState<boolean>(true);
 
+export function Analysis() {
+    const [patientId, setPatientId] = useState<string>('');
+    const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
+    const [rightEyeImage, setRightEyeImage] = useState<File | null>(null);
+    const [leftEyePreview, setLeftEyePreview] = useState<string | null>(null);
+    const [rightEyePreview, setRightEyePreview] = useState<string | null>(null);
+    const [apiData, setApiData] = useState<ApiResponse | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [showInputCard, setShowInputCard] = useState<boolean>(true);
+  
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
   };
@@ -222,7 +247,7 @@ export function Analysis() {
   
       const data: ApiResponse = await response.json();
       setApiData(data);
-      setShowInputCard(false);  // Hide the input card after receiving data
+      setShowInputCard(false);
     } catch (error) {
       if (error instanceof Error) {
         setError(`An error occurred while processing your request: ${error.message}`);
@@ -275,7 +300,7 @@ export function Analysis() {
                             height={150}
                             className="object-cover"
                           />
-                          {isLoading && <Sparkles />}
+                          {isLoading && <DistortedGlass />}
                         </motion.div>
                       )}
                     </div>
@@ -296,7 +321,7 @@ export function Analysis() {
                             height={150}
                             className="object-cover"
                           />
-                          {isLoading && <Sparkles />}
+                          {isLoading && <DistortedGlass />}
                         </motion.div>
                       )}
                     </div>
