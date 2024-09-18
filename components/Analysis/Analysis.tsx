@@ -98,14 +98,15 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
   const { stage, confidence, explanation, Risk, predicted_class } = data;
   const chartData: ChartDataItem[] = [
     {
-      name: 'Risk',
-      value: parseFloat(Risk.replace('%', '')),
-      displayValue: Risk,
+      name: 'Prediction Class',
+      value: predicted_class,
+      displayValue: stage,
       markers: [
-        { position: 33, label: 'Low' },
-        { position: 66, label: 'Medium' },
-        { position: 100, label: 'High' },
-      ]
+        { position: 33, label: 'No DR' },
+        { position: 66, label: 'Moderate' },
+        { position: 100, label: 'Severe' },
+      ],
+      isPredictionClass: true
     },
     {
       name: 'Confidence',
@@ -118,16 +119,16 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
       ],
       isConfidence: true
     },
+    
     {
-      name: 'Prediction Class',
-      value: predicted_class,
-      displayValue: stage,
+      name: 'Risk',
+      value: parseFloat(Risk.replace('%', '')),
+      displayValue: Risk,
       markers: [
-        { position: 33, label: 'No DR' },
-        { position: 66, label: 'Moderate' },
-        { position: 100, label: 'Severe' },
-      ],
-      isPredictionClass: true
+        { position: 33, label: 'Low' },
+        { position: 66, label: 'Medium' },
+        { position: 100, label: 'High' },
+      ]
     },
   ];
 
