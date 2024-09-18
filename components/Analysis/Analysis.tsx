@@ -285,17 +285,17 @@ const SVGLineGlowAnimate: React.FC<SVGLineGlowAnimateProps> = ({
 const GlowingLineGrid = () => {
   return (
     <div className="absolute inset-0 z-20 pointer-events-none">
-      <div className="w-full h-full grid grid-cols-8 grid-rows-4">
-        {[...Array(32)].map((_, index) => (
+      <div className="w-full h-full grid grid-cols-64 grid-rows-8">
+        {[...Array(512)].map((_, index) => (
           <div key={index} className="flex items-center justify-center">
             <SVGLineGlowAnimate 
               movementDelay={index * 200} 
               id={index} 
               additionalHeight={
-                index % 8 === 1 || index % 8 === 2 || index % 8 === 5 || index % 8 === 6 ? 20 : 0
+                index % 64 === 1 || index % 64 === 2 || index % 64 === 5 || index % 64 === 6 ? 20 : 0
               } 
               initialGradientY={
-                index % 8 === 0 || index % 8 === 3 || index % 8 === 4 || index % 8 === 7 ? 20 : 0
+                index % 64 === 0 || index % 64 === 3 || index % 64 === 4 || index % 64 === 7 ? 20 : 0
               }
             />
           </div>
@@ -304,6 +304,8 @@ const GlowingLineGrid = () => {
     </div>
   );
 };
+
+
 const DistortedGlass = () => {
   const [isVisible, setIsVisible] = useState(true);
 
