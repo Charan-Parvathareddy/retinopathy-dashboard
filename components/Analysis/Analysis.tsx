@@ -285,14 +285,14 @@ const SVGLineGlowAnimate: React.FC<SVGLineGlowAnimateProps> = ({
 const GlowingLineGrid = () => {
   return (
     <div className="absolute inset-0 z-20 pointer-events-none">
-      <div className="w-full h-full grid grid-cols-3 grid-rows-3">
-        {[...Array(9)].map((_, index) => (
+      <div className="w-full h-full grid grid-cols-4 grid-rows-2">
+        {[...Array(8)].map((_, index) => (
           <div key={index} className="flex items-center justify-center">
             <SVGLineGlowAnimate 
-              movementDelay={index * 1000} 
+              movementDelay={index * 500} 
               id={index} 
-              additionalHeight={index % 3 === 1 ? 20 : 0} 
-              initialGradientY={index % 3 === 0 ? 20 : 0}
+              additionalHeight={index % 4 === 1 || index % 4 === 2 ? 20 : 0} 
+              initialGradientY={index % 4 === 0 || index % 4 === 3 ? 20 : 0}
             />
           </div>
         ))}
@@ -307,7 +307,7 @@ const DistortedGlass = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setIsVisible((prev) => !prev);
-    }, isVisible ? 5000 : 2000);
+    }, isVisible ? 5000 : 3);
 
     return () => clearInterval(interval);
   }, [isVisible]);
@@ -363,14 +363,13 @@ const DistortedGlass = () => {
   );
 };
 
-const MovingImage = ({ src, alt }: { src: string; alt: string }) => {
+const MovingImage = ({ src, alt, isMoving }: { src: string; alt: string; isMoving: boolean }) => {
   return (
     <motion.div
       className="relative w-[150px] h-[150px] overflow-hidden"
-      initial={{ x: 0 }}
-      animate={{ x: [0, 10, -10, 0] }}
+      animate={isMoving ? { x: [0, 10, -10, 0] } : { x: 0 }}
       transition={{ 
-        repeat: Infinity, 
+        repeat: isMoving ? Infinity : 0, 
         duration: 4, 
         ease: "easeInOut" 
       }}
@@ -396,6 +395,7 @@ export function Analysis() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showInputCard, setShowInputCard] = useState<boolean>(true);
+  const [isMoving, setIsMoving] = useState<boolean>(false);
 
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
@@ -421,6 +421,7 @@ export function Analysis() {
   
     setIsLoading(true);
     setError(null);
+    setIsMoving(true);
   
     const formData = new FormData();
     formData.append('left_image', leftEyeImage);
@@ -447,6 +448,7 @@ export function Analysis() {
       console.error('Error:', error);
     } finally {
       setIsLoading(false);
+      setIsMoving(false);
     }
   };
 
@@ -478,7 +480,7 @@ export function Analysis() {
                       <FileUpload onChange={(file) => handleImageUpload(file, 'left')} />
                       {leftEyePreview && (
                         <div className="mt-2 flex items-center justify-center relative overflow-hidden">
-                          <MovingImage src={leftEyePreview} alt="Left Eye Preview" />
+                          <MovingImage src={leftEyePreview} alt="Left Eye Preview" isMoving={isMoving} />
                           {isLoading && <DistortedGlass />}
                         </div>
                       )}
@@ -488,7 +490,7 @@ export function Analysis() {
                       <FileUpload onChange={(file) => handleImageUpload(file, 'right')} />
                       {rightEyePreview && (
                         <div className="mt-2 flex items-center justify-center relative overflow-hidden">
-                          <MovingImage src={rightEyePreview} alt="Right Eye Preview" />
+                          <MovingImage src={rightEyePreview} alt="Right Eye Preview" isMoving={isMoving} />
                           {isLoading && <DistortedGlass />}
                         </div>
                       )}
