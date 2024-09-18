@@ -472,11 +472,12 @@ export function Analysis() {
         <div className="flex-1 p-6">
           <div className="max-w-6xl mx-auto">
             {showInputCard ? (
-               <ShineBorder
+              
+              <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                 <ShineBorder
                className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl"
                color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
              >
-              <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <CardHeader className="bg-gradient">
                   <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
                 </CardHeader>
@@ -532,8 +533,9 @@ export function Analysis() {
                     </motion.div>
                   )}
                 </CardFooter>
+                </ShineBorder>
               </Card>
-              </ShineBorder>
+              
             ) : null}
 
             {apiData && (
