@@ -35,17 +35,20 @@ interface ChartDataItem {
 
 const getColorForValue = (value: number, isConfidence: boolean, isPredictionClass: boolean): string => {
   if (isConfidence) {
-    if (value <= 33) return 'hsl(var(--destructive))';
-    if (value <= 66) return 'hsl(var(--warning))';
-    return 'hsl(var(--success))';
+    if (value <= 25) return 'hsl(var(--chart-2))'; // Red
+    if (value <= 50) return 'hsl(var(--chart-5))'; // Orange
+    if (value <= 75) return 'hsl(var(--chart-4))'; // Yellow
+    return 'hsl(var(--chart-1))'; // Green
   } else if (isPredictionClass) {
-    if (value === 0) return 'hsl(var(--success))';
-    if (value === 1) return 'hsl(var(--warning))';
-    return 'hsl(var(--destructive))';
+    if (value <= 1) return 'hsl(var(--chart-1))'; // Green
+    if (value <= 2) return 'hsl(var(--chart-4))'; // Yellow
+    if (value <= 3) return 'hsl(var(--chart-5))'; // Orange
+    return 'hsl(var(--chart-2))'; // Red
   } else {
-    if (value <= 33) return 'hsl(var(--success))';
-    if (value <= 66) return 'hsl(var(--warning))';
-    return 'hsl(var(--destructive))';
+    if (value <= 25) return 'hsl(var(--chart-1))'; // Green
+    if (value <= 50) return 'hsl(var(--chart-4))'; // Yellow
+    if (value <= 75) return 'hsl(var(--chart-5))'; // Orange
+    return 'hsl(var(--chart-2))';
   }
 };
 
@@ -148,7 +151,6 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
   );
 };
 
-
 const Sparkles = () => {
   return (
     <div className="absolute inset-0 pointer-events-none">
@@ -177,6 +179,7 @@ export function Analysis() {
   const [apiData, setApiData] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [showInputCard, setShowInputCard] = useState<boolean>(true);
 
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
@@ -218,6 +221,7 @@ export function Analysis() {
   
       const data: ApiResponse = await response.json();
       setApiData(data);
+      setShowInputCard(false);  // Hide the input card after receiving data
     } catch (error) {
       if (error instanceof Error) {
         setError(`An error occurred while processing your request: ${error.message}`);
@@ -235,92 +239,94 @@ export function Analysis() {
       <Head>
         <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
       </Head>
-      <div className="h-[50rem] w-full dark:bg-black bg-white dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative flex items-center justify-center">
+      <div className="min-h-screen w-full dark:bg-black bg-white dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative flex items-center justify-center">
         <div className="flex-1 p-6">
-          <div className="max-w-4xl mx-auto">
-            <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader className="bg-gradient">
-                <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6 p-6">
-                <Input
-                  type="text"
-                  placeholder="Patient ID"
-                  value={patientId}
-                  onChange={handlePatientIdChange}
-                  className="w-full border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500"
-                />
+          <div className="max-w-6xl mx-auto">
+            {showInputCard ? (
+              <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardHeader className="bg-gradient">
+                  <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 p-6">
+                  <Input
+                    type="text"
+                    placeholder="Patient ID"
+                    value={patientId}
+                    onChange={handlePatientIdChange}
+                    className="w-full border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <p className="text-sm font-bold text-gray-700">Left Eye Image</p>
-                    <FileUpload onChange={(file) => handleImageUpload(file, 'left')} />
-                    {leftEyePreview && (
-                      <motion.div 
-                        className="mt-2 flex items-center justify-center relative overflow-hidden"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Image
-                          src={leftEyePreview}
-                          alt="Left Eye Preview"
-                          width={150}
-                          height={150}
-                          className="object-cover"
-                        />
-                        {isLoading && <Sparkles />}
-                      </motion.div>
-                    )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <p className="text-sm font-bold text-gray-700">Left Eye Image</p>
+                      <FileUpload onChange={(file) => handleImageUpload(file, 'left')} />
+                      {leftEyePreview && (
+                        <motion.div 
+                          className="mt-2 flex items-center justify-center relative overflow-hidden"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <Image
+                            src={leftEyePreview}
+                            alt="Left Eye Preview"
+                            width={150}
+                            height={150}
+                            className="object-cover"
+                          />
+                          {isLoading && <Sparkles />}
+                        </motion.div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-bold text-gray-700">Right Eye Image</p>
+                      <FileUpload onChange={(file) => handleImageUpload(file, 'right')} />
+                      {rightEyePreview && (
+                        <motion.div 
+                          className="mt-2 flex items-center justify-center relative overflow-hidden"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <Image
+                            src={rightEyePreview}
+                            alt="Right Eye Preview"
+                            width={150}
+                            height={150}
+                            className="object-cover"
+                          />
+                          {isLoading && <Sparkles />}
+                        </motion.div>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-sm font-bold text-gray-700">Right Eye Image</p>
-                    <FileUpload onChange={(file) => handleImageUpload(file, 'right')} />
-                    {rightEyePreview && (
-                      <motion.div 
-                        className="mt-2 flex items-center justify-center relative overflow-hidden"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Image
-                          src={rightEyePreview}
-                          alt="Right Eye Preview"
-                          width={150}
-                          height={150}
-                          className="object-cover"
-                        />
-                        {isLoading && <Sparkles />}
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="bg-gray-50 p-4 flex flex-col items-center">
-                <Button 
-                  onClick={handleSubmit} 
-                  disabled={isLoading}
-                  className="hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center"
-                >
-                  {isLoading ? 'Analyzing...' : 'Submit Analysis'}
-                  {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
-                </Button>
-                {error && (
-                  <motion.div 
-                    className="text-red-500 mt-2 flex items-center"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                </CardContent>
+                <CardFooter className="bg-gray-50 p-4 flex flex-col items-center">
+                  <Button 
+                    onClick={handleSubmit} 
+                    disabled={isLoading}
+                    className="hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center"
                   >
-                    <AlertTriangle className="mr-2" /> {error}
-                  </motion.div>
-                )}
-              </CardFooter>
-            </Card>
+                    {isLoading ? 'Analyzing...' : 'Submit Analysis'}
+                    {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
+                  </Button>
+                  {error && (
+                    <motion.div 
+                      className="text-red-500 mt-2 flex items-center"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <AlertTriangle className="mr-2" /> {error}
+                    </motion.div>
+                  )}
+                </CardFooter>
+              </Card>
+            ) : null}
 
             {apiData && (
               <motion.div 
-                className="space-y-6"
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
