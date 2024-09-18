@@ -9,7 +9,6 @@ import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
 import { ArrowRight, Eye, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ShineBorder from '@/components/magicui/shine-border';
 
 interface EyeResult {
   predicted_class: number;
@@ -472,11 +471,8 @@ export function Analysis() {
         <div className="flex-1 p-6">
           <div className="max-w-6xl mx-auto">
             {showInputCard ? (
-               <ShineBorder
-               className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl"
-               color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
-             >
-              <Card className="mb-8 ">
+              
+              <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <CardHeader className="bg-gradient">
                   <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
                 </CardHeader>
@@ -533,7 +529,6 @@ export function Analysis() {
                   )}
                 </CardFooter>
               </Card>
-              </ShineBorder>
             ) : null}
 
             {apiData && (
