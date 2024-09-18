@@ -121,7 +121,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
     },
     
     {
-      name: 'Risk',
+      name: 'Risk of Proceeding to Next Severe Stage',
       value: parseFloat(Risk.replace('%', '')),
       displayValue: Risk,
       markers: [
