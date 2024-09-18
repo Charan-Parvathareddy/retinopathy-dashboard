@@ -1,14 +1,16 @@
 "use client";
 import React, { useState, useEffect, ChangeEvent } from 'react';
+import  { ReactNode } from 'react';
 import Head from 'next/head';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter  } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
 import { ArrowRight, Eye, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
 
 interface EyeResult {
   predicted_class: number;
@@ -393,6 +395,24 @@ const MovingImage = ({ src, alt, isMoving }: { src: string; alt: string; isMovin
   );
 };
 
+
+
+interface AnimatedBorderCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
+  className?: string;
+}
+
+const AnimatedBorderCard: React.FC<AnimatedBorderCardProps> = ({ children, className, ...props }) => {
+  return (
+    <div className="relative p-[1px] overflow-hidden rounded-xl backdrop-blur-3xl">
+      <span className="absolute inset-[-1000%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+      <Card className={`relative bg-white dark:bg-gray-950 rounded-xl ${className}`} {...props}>
+        {children}
+      </Card>
+    </div>
+  );
+};
+
 export function Analysis() {
   const [patientId, setPatientId] = useState<string>('');
   const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
@@ -468,12 +488,12 @@ export function Analysis() {
       <div className="min-h-screen w-full dark:bg-black bg-white dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative flex items-center justify-center">
         <div className="flex-1 p-6">
           <div className="max-w-6xl mx-auto">
-            {showInputCard ? (
-              <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <CardHeader className="bg-gradient">
-                  <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6 p-6">
+          {showInputCard ? (
+  <AnimatedBorderCard className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <CardHeader className="bg-gradient">
+      <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-6 p-6">
                   <Input
                     type="text"
                     placeholder="Patient ID"
@@ -525,7 +545,7 @@ export function Analysis() {
                     </motion.div>
                   )}
                 </CardFooter>
-              </Card>
+                </AnimatedBorderCard>
             ) : null}
 
             {apiData && (
