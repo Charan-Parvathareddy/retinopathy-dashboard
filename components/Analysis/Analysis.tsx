@@ -9,7 +9,7 @@ import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
 import { ArrowRight, Eye, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import ShineBorder from '../magicui/shine-border';
 interface EyeResult {
   predicted_class: number;
   stage: string;
@@ -472,10 +472,13 @@ export function Analysis() {
         <div className="flex-1 p-6">
         
           <div className="max-w-6xl mx-auto">
-            
+          <ShineBorder
+                className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl"
+                color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
+              >
           
             {showInputCard ? (
-              
+                
               <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 
       
@@ -537,9 +540,10 @@ export function Analysis() {
                 </CardFooter>
                
               </Card>
+           
               
             ) : null}
-
+   </ShineBorder>
             {apiData && (
               <motion.div 
                 className="grid grid-cols-1 md:grid-cols-2 gap-6"
