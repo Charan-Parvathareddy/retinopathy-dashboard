@@ -475,6 +475,9 @@ export function Analysis() {
             {showInputCard ? (
               
               <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div className="relative h-[200px] w-[200px] rounded-xl">
+      <BorderBeam />
+ 
                 <CardHeader className="bg-gradient">
                   <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
                 </CardHeader>
@@ -530,6 +533,7 @@ export function Analysis() {
                     </motion.div>
                   )}
                 </CardFooter>
+                </div>
               </Card>
               
             ) : null}
