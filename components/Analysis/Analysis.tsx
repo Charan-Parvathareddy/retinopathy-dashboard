@@ -471,12 +471,13 @@ export function Analysis() {
       <div className="min-h-screen w-full dark:bg-black bg-white dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative flex items-center justify-center">
         <div className="flex-1 p-6">
           <div className="max-w-6xl mx-auto">
+            <BorderBeam/>
           
             {showInputCard ? (
               
               <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 
-      <BorderBeam />
+      
  
                 <CardHeader className="bg-gradient">
                   <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
