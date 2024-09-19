@@ -470,8 +470,9 @@ export function Analysis() {
       </Head>
       <div className="min-h-screen w-full dark:bg-black bg-white dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative flex items-center justify-center">
         <div className="flex-1 p-6">
+        <BorderBeam/>
           <div className="max-w-6xl mx-auto">
-            <BorderBeam/>
+            
           
             {showInputCard ? (
               
