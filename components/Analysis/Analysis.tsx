@@ -81,7 +81,7 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Info className="ml-1 h-4 w-4 text-gray-400 cursor-help" />
+                    <Info className="ml-1 h-4 w-4 text-gray-400 " />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>{getTooltipContent(item.name)}</p>
@@ -492,18 +492,10 @@ export function Analysis() {
         <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
       </Head>
       <div className="min-h-screen w-full dark:bg-black bg-white dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative flex items-center justify-center">
-      
-        <div className="flex-1 p-6">
-       
-          <div className="max-w-6xl mx-auto">
-         
-          
-            {showInputCard ? (
-                
-              <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                
-      
- 
+      <div className="flex-1 p-6">
+      <div className="max-w-6xl mx-auto">
+        {showInputCard ? (
+        <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <CardHeader className="bg-gradient">
                   <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
                 </CardHeader>
@@ -560,12 +552,9 @@ export function Analysis() {
                   )}
                 </CardFooter>
                
-              </Card>
-           
-              
-            ) : null}
-   
-            {apiData && (
+        </Card>
+        ) : null}
+    {apiData && (
               <motion.div 
                 className="grid grid-cols-1 md:grid-cols-2 gap-6"
                 initial={{ opacity: 0, y: 20 }}
@@ -577,9 +566,9 @@ export function Analysis() {
               </motion.div>
             )}
           </div>
-         
-        </div>
-      </div>
+        
+       </div>
+    </div>
     </>
   );
 }
