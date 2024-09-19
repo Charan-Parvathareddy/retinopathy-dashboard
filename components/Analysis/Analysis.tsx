@@ -473,8 +473,7 @@ export function Analysis() {
           <div className="max-w-6xl mx-auto">
           
             {showInputCard ? (
-              <div className=" h-max w-max rounded-xl">
-                <BorderBeam />
+              
               <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <CardHeader className="bg-gradient">
                   <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
@@ -532,7 +531,7 @@ export function Analysis() {
                   )}
                 </CardFooter>
               </Card>
-              </div>
+              
             ) : null}
 
             {apiData && (
