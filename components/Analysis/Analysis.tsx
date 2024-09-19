@@ -302,7 +302,7 @@ const GlowingLineGrid = () => {
         ))}
 
         {/* Center horizontal line */}
-        <div className="absolute top-1/2 left-1/3 w-1/3 h-[2px] bg-[#ace5f4] opacity-70 transform -translate-y-1/2" />
+      
         </div>
     </div>
   );
