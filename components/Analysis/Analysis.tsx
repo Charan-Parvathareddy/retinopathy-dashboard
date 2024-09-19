@@ -475,7 +475,7 @@ export function Analysis() {
             {showInputCard ? (
               
               <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="relative h-[200px] w-[200px] rounded-xl">
+                <div className="relative h-max w-max rounded-xl">
       <BorderBeam />
  
                 <CardHeader className="bg-gradient">
