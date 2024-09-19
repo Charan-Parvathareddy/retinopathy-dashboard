@@ -9,7 +9,7 @@ import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
 import { ArrowRight, Eye, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ShineBorder from '../magicui/shine-border';
+
 interface EyeResult {
   predicted_class: number;
   stage: string;
@@ -470,10 +470,7 @@ export function Analysis() {
       <div className="min-h-screen w-full dark:bg-black bg-white dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative flex items-center justify-center">
       
         <div className="flex-1 p-6">
-        <ShineBorder
-                className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl"
-                color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
-              >
+       
           <div className="max-w-6xl mx-auto">
          
           
@@ -556,7 +553,7 @@ export function Analysis() {
               </motion.div>
             )}
           </div>
-          </ShineBorder>
+         
         </div>
       </div>
     </>
