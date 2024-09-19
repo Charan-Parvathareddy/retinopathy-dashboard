@@ -83,7 +83,7 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
                   <TooltipTrigger asChild>
                     <Info className="ml-1 h-4 w-4 text-gray-400 " />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="bg-white text-black rounded-lg border border-gray-200 shadow-lg p-2">
                     <p>{getTooltipContent(item.name)}</p>
                   </TooltipContent>
                 </Tooltip>
