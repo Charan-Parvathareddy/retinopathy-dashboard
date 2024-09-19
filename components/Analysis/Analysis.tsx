@@ -9,6 +9,8 @@ import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
 import { ArrowRight, Eye, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface EyeResult {
   predicted_class: number;
@@ -32,6 +34,19 @@ interface ChartDataItem {
   isConfidence?: boolean;
   isPredictionClass?: boolean;
 }
+
+const getTooltipContent = (itemName: string): string => {
+  switch (itemName) {
+    case 'Prediction Class':
+      return 'This tells you which stage of diabetic retinopathy the model thinks you have.';
+    case 'Confidence':
+      return 'This shows how sure the model is about its prediction, with a higher number meaning more certainty.';
+    case 'Risk':
+      return 'This indicates the chance that your condition might get worse over time.';
+    default:
+      return '';
+  }
+};
 
 const getColorForValue = (value: number, isConfidence: boolean, isPredictionClass: boolean): string => {
   if (isConfidence) {
@@ -64,7 +79,19 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
           transition={{ duration: 0.5 }}
         >
           <div className="flex justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">{item.name}</span>
+          <span className="text-sm font-medium text-gray-700 flex items-center">
+              {item.name}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="ml-1 h-4 w-4 text-gray-400 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{getTooltipContent(item.name)}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </span>
             <span className="text-sm font-bold text-gray-900">{item.displayValue}</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-5 dark:bg-gray-700">
