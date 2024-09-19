@@ -470,12 +470,12 @@ export function Analysis() {
       <div className="min-h-screen w-full dark:bg-black bg-white dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative flex items-center justify-center">
       
         <div className="flex-1 p-6">
-        
-          <div className="max-w-6xl mx-auto">
-          <ShineBorder
+        <ShineBorder
                 className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl"
                 color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
               >
+          <div className="max-w-6xl mx-auto">
+         
           
             {showInputCard ? (
                 
@@ -543,7 +543,7 @@ export function Analysis() {
            
               
             ) : null}
-   </ShineBorder>
+   
             {apiData && (
               <motion.div 
                 className="grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -556,6 +556,7 @@ export function Analysis() {
               </motion.div>
             )}
           </div>
+          </ShineBorder>
         </div>
       </div>
     </>
