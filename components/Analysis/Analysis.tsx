@@ -49,24 +49,21 @@ const getTooltipContent = (itemName: string): string => {
 };
 
 const getColorForValue = (value: number, isConfidence: boolean, isPredictionClass: boolean): string => {
-  if (isConfidence) {
-    if (value <= 25) return 'hsl(var(--chart-2))'; // Red
-    if (value <= 50) return 'hsl(var(--chart-5))'; // Orange
-    if (value <= 75) return 'hsl(var(--chart-4))'; // Yellow
-    return 'hsl(var(--chart-1))'; // Green
-  } else if (isPredictionClass) {
-    if (value <= 1) return 'hsl(var(--chart-1))'; // Green
-    if (value <= 2) return 'hsl(var(--chart-4))'; // Yellow
-    if (value <= 3) return 'hsl(var(--chart-5))'; // Orange
-    return 'hsl(var(--chart-2))'; // Red
+  if (isPredictionClass) {
+    if (value <= 0) return 'hsl(var(--chart-1))'; // Green for No DR
+    if (value <= 1) return 'hsl(var(--chart-4))'; // Yellow for Moderate
+    return 'hsl(var(--chart-2))'; // Red for Severe
+  } else if (isConfidence) {
+    if (value <= 33) return 'hsl(var(--chart-2))'; // Red for Low
+    if (value <= 66) return 'hsl(var(--chart-4))'; // Yellow for Medium
+    return 'hsl(var(--chart-1))'; // Green for High
   } else {
-    if (value <= 25) return 'hsl(var(--chart-1))'; // Green
-    if (value <= 50) return 'hsl(var(--chart-4))'; // Yellow
-    if (value <= 75) return 'hsl(var(--chart-5))'; // Orange
-    return 'hsl(var(--chart-2))';
+    // For Risk
+    if (value <= 33) return 'hsl(var(--chart-1))'; // Green for Low
+    if (value <= 66) return 'hsl(var(--chart-4))'; // Yellow for Medium
+    return 'hsl(var(--chart-2))'; // Red for High
   }
 };
-
 const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
   return (
     <div className="space-y-6">
