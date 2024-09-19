@@ -38,7 +38,7 @@ interface ChartDataItem {
 const getTooltipContent = (itemName: string): string => {
   switch (itemName) {
     case 'Prediction Class':
-      return 'This tells you which stage of diabetic retinopathy the model thinks you have.';
+      return 'The model evaluates and indicates the stage of diabetic retinopathy it has identified in your case.';
     case 'Confidence':
       return 'This shows how sure the model is about its prediction, with a higher number meaning more certainty.';
     case 'Risk':
