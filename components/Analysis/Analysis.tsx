@@ -1,6 +1,7 @@
-"use client";
-import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
+import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 import Head from 'next/head';
+import { toPng } from 'html-to-image';
+import jsPDF from 'jspdf';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -10,9 +11,6 @@ import Image from 'next/image';
 import { ArrowRight, Eye, AlertTriangle, Download, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { usePDF } from 'react-to-pdf';
-import { toPng } from 'html-to-image';
-import jsPDF from 'jspdf';
 
 interface EyeResult {
   predicted_class: number;
@@ -222,72 +220,42 @@ const PDFTemplate = ({
   const renderEyeAnalysis = (eye: string, data: EyeResult | undefined) => {
     if (!data) {
       return (
-        <Card className="mb-4 border border-gray-300">
-          <CardHeader className="bg-gray-100">
-            <CardTitle className="text-lg font-bold flex items-center">
-              <Eye className="mr-2" /> {eye} Eye Analysis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>No data available for {eye} eye.</p>
-          </CardContent>
-        </Card>
+        <div style={{ marginBottom: '16px', border: '1px solid #ccc', padding: '16px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>{eye} Eye Analysis</h2>
+          <p>No data available for {eye} eye.</p>
+        </div>
       );
     }
 
     return (
-      <Card className="mb-4 border border-gray-300">
-        <CardHeader className="bg-gray-100">
-          <CardTitle className="text-lg font-bold flex items-center">
-            <Eye className="mr-2" /> {eye} Eye Analysis
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <p>
-              <strong>Stage:</strong> {data.stage}
-            </p>
-            <p>
-              <strong>Confidence:</strong> {data.confidence}
-            </p>
-            <p>
-              <strong>Risk:</strong> {data.Risk}
-            </p>
-            <p>
-              <strong>Explanation:</strong> {data.explanation}
-            </p>
-            {data.Note && (
-              <p>
-                <strong>Note:</strong> {data.Note}
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <div style={{ marginBottom: '16px', border: '1px solid #ccc', padding: '16px' }}>
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>{eye} Eye Analysis</h2>
+        <p><strong>Stage:</strong> {data.stage}</p>
+        <p><strong>Confidence:</strong> {data.confidence}</p>
+        <p><strong>Risk:</strong> {data.Risk}</p>
+        <p><strong>Explanation:</strong> {data.explanation}</p>
+        {data.Note && <p><strong>Note:</strong> {data.Note}</p>}
+      </div>
     );
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white" style={{ fontFamily: 'Arial, sans-serif' }}>
-    <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>Eye Analysis Report</h1>
-    <hr style={{ margin: '16px 0' }} />
-    <div style={{ marginBottom: '16px' }}>
-      <p>
-        <strong>Patient ID:</strong> {patientId}
-      </p>
-      <p>
-        <strong>Report Date:</strong> {formatDate(new Date())}
-      </p>
+    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+      <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>Eye Analysis Report</h1>
+      <hr style={{ margin: '16px 0' }} />
+      <div style={{ marginBottom: '16px' }}>
+        <p><strong>Patient ID:</strong> {patientId}</p>
+        <p><strong>Report Date:</strong> {formatDate(new Date())}</p>
+      </div>
+      <hr style={{ margin: '16px 0' }} />
+      {renderEyeAnalysis('Left', leftEyeData)}
+      {renderEyeAnalysis('Right', rightEyeData)}
+      <hr style={{ margin: '16px 0' }} />
+      <div style={{ fontSize: '12px', color: '#666' }}>
+        <p>This report is generated automatically and should be reviewed by a healthcare professional.</p>
+        <p>For any questions or concerns, please consult with your doctor.</p>
+      </div>
     </div>
-    <hr style={{ margin: '16px 0' }} />
-    {renderEyeAnalysis('Left', leftEyeData)}
-    {renderEyeAnalysis('Right', rightEyeData)}
-    <hr style={{ margin: '16px 0' }} />
-    <div style={{ fontSize: '12px', color: '#666' }}>
-      <p>This report is generated automatically and should be reviewed by a healthcare professional.</p>
-      <p>For any questions or concerns, please consult with your doctor.</p>
-    </div>
-  </div>
   );
 };
 
@@ -303,42 +271,17 @@ export function Analysis() {
   const [showInputCard, setShowInputCard] = useState<boolean>(true);
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const [showPdfButton, setShowPdfButton] = useState<boolean>(false);
-  const { toPDF, targetRef } = usePDF({ filename: 'eye-analysis-report.pdf' });
-
   const [isPdfReady, setIsPdfReady] = useState(false);
-  const pdfContentRef = useRef(null);
-  
+  const pdfContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (apiData) {
-      // Add a small delay to ensure the content is rendered
       const timer = setTimeout(() => {
         setIsPdfReady(true);
       }, 1000);
       return () => clearTimeout(timer);
     }
   }, [apiData]);
-
-  const handlePDFDownload = async () => {
-    if (pdfContentRef.current && isPdfReady) {
-      const pdfContent = pdfContentRef.current;
-      try {
-        const dataUrl = await toPng(pdfContent, { quality: 0.95 });
-        const pdf = new jsPDF();
-        const imgProps = pdf.getImageProperties(dataUrl);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('eye-analysis-report.pdf');
-      } catch (error) {
-        console.error('Error generating PDF:', error);
-        // Optionally, show an error message to the user
-      }
-    } else {
-      console.warn('PDF content is not ready yet');
-      // Optionally, show a message to the user to wait
-    }
-  };
 
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
@@ -387,7 +330,7 @@ export function Analysis() {
       const data: ApiResponse = await response.json();
       setApiData(data);
       setShowInputCard(false);
-      setShowPdfButton(true); // Show the PDF button after successful API response
+      setShowPdfButton(true);
     } catch (error) {
       if (error instanceof Error) {
         setError(`An error occurred while processing your request: ${error.message}`);
@@ -401,7 +344,24 @@ export function Analysis() {
     }
   };
 
-  
+  const handlePDFDownload = async () => {
+    if (pdfContentRef.current && isPdfReady) {
+      const pdfContent = pdfContentRef.current;
+      try {
+        const dataUrl = await toPng(pdfContent, { quality: 0.95 });
+        const pdf = new jsPDF();
+        const imgProps = pdf.getImageProperties(dataUrl);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('eye-analysis-report.pdf');
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+      }
+    } else {
+      console.warn('PDF content is not ready yet');
+    }
+  };
 
   return (
     <>
@@ -432,7 +392,6 @@ export function Analysis() {
                       {leftEyePreview && (
                         <div className="mt-2 flex items-center justify-center relative overflow-hidden">
                           <MovingImage src={leftEyePreview} alt="Left Eye Preview" isMoving={isMoving} />
-                          {isLoading && <DistortedGlass />}
                         </div>
                       )}
                     </div>
@@ -442,7 +401,6 @@ export function Analysis() {
                       {rightEyePreview && (
                         <div className="mt-2 flex items-center justify-center relative overflow-hidden">
                           <MovingImage src={rightEyePreview} alt="Right Eye Preview" isMoving={isMoving} />
-                          {isLoading && <DistortedGlass />}
                         </div>
                       )}
                     </div>
@@ -470,7 +428,7 @@ export function Analysis() {
                 </CardFooter>
               </Card>
             ) : null}
-             {apiData && (
+            {apiData && (
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-2xl font-bold">Eye Analysis Report</h2>
@@ -499,7 +457,6 @@ export function Analysis() {
           </div>
         </div>
       </div>
-      {/* Hidden div for PDF generation */}
       <div style={{ display: 'none' }}>
         <div ref={pdfContentRef}>
           <PDFTemplate
@@ -513,54 +470,4 @@ export function Analysis() {
   );
 }
 
-// DistortedGlass component (if you want to keep it)
-const DistortedGlass = () => {
-  const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsVisible((prev) => !prev);
-    }, isVisible ? 5000 : 3);
-
-    return () => clearInterval(interval);
-  }, [isVisible]);
-
-  return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="absolute inset-0 z-10 overflow-hidden"
-        >
-          <div className="glass-effect h-full w-full" />
-        </motion.div>
-      )}
-      <svg className="hidden">
-        <defs>
-          <filter id="fractal-noise-glass">
-            <feTurbulence type="fractalNoise" baseFrequency="0.12 0.12" numOctaves="1" result="warp" />
-            <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="30" in="SourceGraphic" in2="warp" />
-          </filter>
-        </defs>
-      </svg>
-      <style jsx>{`
-        .glass-effect {
-          background: rgba(0, 0, 0, 0.2);
-          background: repeating-radial-gradient(
-            circle at 50% 50%,
-            rgb(255 255 255 / 0),
-            rgba(255, 255, 255, 0.2) 10px,
-            rgb(255 255 255) 31px
-          );
-          filter: url(#fractal-noise-glass);
-          background-size: 6px 6px;
-          backdrop-filter: blur(3px);
-        }
-      `}</style>
-    </AnimatePresence>
-  );
-};
-
+export default Analysis;
