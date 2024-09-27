@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 import Head from 'next/head';
 import { toPng } from 'html-to-image';
