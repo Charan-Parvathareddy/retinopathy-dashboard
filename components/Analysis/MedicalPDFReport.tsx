@@ -1,8 +1,20 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { EyeResult, ApiResponse } from './types'; // Make sure to define these types
 
+interface EyeResult {
+    predicted_class: number;
+    stage: string;
+    confidence: string;
+    explanation: string;
+    Note: string | null;
+    Risk: string;
+  }
+  
+  interface ApiResponse {
+    left_image_result: EyeResult;
+    right_image_result: EyeResult;
+  }
 const EyeAnalysisSection = ({ eye, data }: { eye: string; data: EyeResult }) => (
   <div className="mb-6">
     <h3 className="text-lg font-bold mb-2">{eye} Eye Analysis</h3>
