@@ -11,6 +11,7 @@ import { ArrowRight, Eye, AlertTriangle, Download, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePDF } from 'react-to-pdf';
+
 interface EyeResult {
   predicted_class: number;
   stage: string;
@@ -68,8 +69,8 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
   return (
     <div className="space-y-6">
       {data.map((item) => (
-        <motion.div 
-          key={item.name} 
+        <motion.div
+          key={item.name}
           className="relative"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -130,7 +131,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
         { position: 66, label: 'Moderate' },
         { position: 100, label: 'Severe' },
       ],
-      isPredictionClass: true
+      isPredictionClass: true,
     },
     {
       name: 'Confidence',
@@ -141,7 +142,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
         { position: 66, label: 'Medium' },
         { position: 100, label: 'High' },
       ],
-      isConfidence: true
+      isConfidence: true,
     },
     {
       name: 'Risk',
@@ -151,7 +152,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
         { position: 33, label: 'Low' },
         { position: 66, label: 'Medium' },
         { position: 100, label: 'High' },
-      ]
+      ],
     },
   ];
 
@@ -162,7 +163,9 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
           <Eye className="mr-2" /> {eye} Eye Analysis
         </CardTitle>
         <Separator className="my-3 bg-white/20" />
-        <CardDescription className="text-lg mt-3 font-medium text-white/90">{stage}: {explanation}</CardDescription>
+        <CardDescription className="text-lg mt-3 font-medium text-white/90">
+          {stage}: {explanation}
+        </CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
         <CustomBarChart data={chartData} />
@@ -180,10 +183,10 @@ const MovingImage = ({ src, alt, isMoving }: { src: string; alt: string; isMovin
     <motion.div
       className="relative w-[150px] h-[150px] overflow-hidden"
       animate={isMoving ? { x: [0, 10, -10, 0] } : { x: 0 }}
-      transition={{ 
-        repeat: isMoving ? Infinity : 0, 
-        duration: 4, 
-        ease: "easeInOut" 
+      transition={{
+        repeat: isMoving ? Infinity : 0,
+        duration: 4,
+        ease: 'easeInOut',
       }}
     >
       <Image
@@ -197,6 +200,94 @@ const MovingImage = ({ src, alt, isMoving }: { src: string; alt: string; isMovin
   );
 };
 
+const PDFTemplate = ({
+  patientId,
+  leftEyeData,
+  rightEyeData,
+}: {
+  patientId: string;
+  leftEyeData: EyeResult | undefined;
+  rightEyeData: EyeResult | undefined;
+}) => {
+  const formatDate = (date: Date): string => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const renderEyeAnalysis = (eye: string, data: EyeResult | undefined) => {
+    if (!data) {
+      return (
+        <Card className="mb-4 border border-gray-300">
+          <CardHeader className="bg-gray-100">
+            <CardTitle className="text-lg font-bold flex items-center">
+              <Eye className="mr-2" /> {eye} Eye Analysis
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>No data available for {eye} eye.</p>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return (
+      <Card className="mb-4 border border-gray-300">
+        <CardHeader className="bg-gray-100">
+          <CardTitle className="text-lg font-bold flex items-center">
+            <Eye className="mr-2" /> {eye} Eye Analysis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <p>
+              <strong>Stage:</strong> {data.stage}
+            </p>
+            <p>
+              <strong>Confidence:</strong> {data.confidence}
+            </p>
+            <p>
+              <strong>Risk:</strong> {data.Risk}
+            </p>
+            <p>
+              <strong>Explanation:</strong> {data.explanation}
+            </p>
+            {data.Note && (
+              <p>
+                <strong>Note:</strong> {data.Note}
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto bg-white">
+      <h1 className="text-2xl font-bold mb-4">Eye Analysis Report</h1>
+      <Separator className="my-4" />
+      <div className="mb-4">
+        <p>
+          <strong>Patient ID:</strong> {patientId}
+        </p>
+        <p>
+          <strong>Report Date:</strong> {formatDate(new Date())}
+        </p>
+      </div>
+      <Separator className="my-4" />
+      {renderEyeAnalysis('Left', leftEyeData)}
+      {renderEyeAnalysis('Right', rightEyeData)}
+      <Separator className="my-4" />
+      <div className="text-sm text-gray-600">
+        <p>This report is generated automatically and should be reviewed by a healthcare professional.</p>
+        <p>For any questions or concerns, please consult with your doctor.</p>
+      </div>
+    </div>
+  );
+};
 
 export function Analysis() {
   const [patientId, setPatientId] = useState<string>('');
@@ -210,7 +301,8 @@ export function Analysis() {
   const [showInputCard, setShowInputCard] = useState<boolean>(true);
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const [showPdfButton, setShowPdfButton] = useState<boolean>(false);
-  const { toPDF, targetRef } = usePDF({filename: 'eye-analysis-report.pdf'});
+  const { toPDF, targetRef } = usePDF({ filename: 'eye-analysis-report.pdf' });
+
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
   };
@@ -232,28 +324,33 @@ export function Analysis() {
       setError('Please fill in all fields and upload both eye images.');
       return;
     }
-  
+
     setIsLoading(true);
     setError(null);
     setIsMoving(true);
-  
+
     const formData = new FormData();
     formData.append('left_image', leftEyeImage);
     formData.append('right_image', rightEyeImage);
-  
+
     try {
-      const response = await fetch(`https://gnayan-huf2h0hjfxb3efg7.southindia-01.azurewebsites.net/predict/?patient_id=${encodeURIComponent(patientId)}`, {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch(
+        `https://gnayan-huf2h0hjfxb3efg7.southindia-01.azurewebsites.net/predict/?patient_id=${encodeURIComponent(
+          patientId
+        )}`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
       }
-  
+
       const data: ApiResponse = await response.json();
       setApiData(data);
       setShowInputCard(false);
-      setShowPdfButton(true);  // Show the PDF button after successful API response
+      setShowPdfButton(true); // Show the PDF button after successful API response
     } catch (error) {
       if (error instanceof Error) {
         setError(`An error occurred while processing your request: ${error.message}`);
@@ -265,6 +362,10 @@ export function Analysis() {
       setIsLoading(false);
       setIsMoving(false);
     }
+  };
+
+  const handlePDFDownload = () => {
+    toPDF(targetRef.current);
   };
 
   return (
@@ -313,8 +414,8 @@ export function Analysis() {
                   </div>
                 </CardContent>
                 <CardFooter className="bg-gray-50 p-4 flex flex-col items-center">
-                  <Button 
-                    onClick={handleSubmit} 
+                  <Button
+                    onClick={handleSubmit}
                     disabled={isLoading}
                     className="hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center"
                   >
@@ -322,7 +423,7 @@ export function Analysis() {
                     {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
                   </Button>
                   {error && (
-                    <motion.div 
+                    <motion.div
                       className="text-red-500 mt-2 flex items-center"
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -335,12 +436,12 @@ export function Analysis() {
               </Card>
             ) : null}
             {apiData && (
-              <div ref={targetRef}>
+              <div>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-2xl font-bold">Eye Analysis Report</h2>
                   {showPdfButton && (
                     <Button
-                      onClick={() => toPDF()}
+                      onClick={handlePDFDownload}
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
                     >
                       <Download className="mr-2" />
@@ -348,7 +449,7 @@ export function Analysis() {
                     </Button>
                   )}
                 </div>
-                <motion.div 
+                <motion.div
                   className="grid grid-cols-1 md:grid-cols-2 gap-6"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -360,6 +461,16 @@ export function Analysis() {
               </div>
             )}
           </div>
+        </div>
+      </div>
+      {/* Hidden div for PDF generation */}
+      <div style={{ display: 'none' }}>
+      <div ref={targetRef}>
+          <PDFTemplate
+            patientId={patientId}
+            leftEyeData={apiData?.left_image_result}
+            rightEyeData={apiData?.right_image_result}
+          />
         </div>
       </div>
     </>
@@ -394,19 +505,8 @@ const DistortedGlass = () => {
       <svg className="hidden">
         <defs>
           <filter id="fractal-noise-glass">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.12 0.12"
-              numOctaves="1"
-              result="warp"
-            />
-            <feDisplacementMap
-              xChannelSelector="R"
-              yChannelSelector="G"
-              scale="30"
-              in="SourceGraphic"
-              in2="warp"
-            />
+            <feTurbulence type="fractalNoise" baseFrequency="0.12 0.12" numOctaves="1" result="warp" />
+            <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="30" in="SourceGraphic" in2="warp" />
           </filter>
         </defs>
       </svg>
