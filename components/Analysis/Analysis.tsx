@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
 import { ArrowRight, Eye, AlertTriangle, Download, Info } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion} from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface EyeResult {
