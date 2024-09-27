@@ -11,8 +11,6 @@ import { ArrowRight, Eye, AlertTriangle, Download, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePDF } from 'react-to-pdf';
-import { MedicalPDFReport } from '@/components/Analysis/MedicalPDFReport'; // Import the new component
-
 interface EyeResult {
   predicted_class: number;
   stage: string;
@@ -199,6 +197,7 @@ const MovingImage = ({ src, alt, isMoving }: { src: string; alt: string; isMovin
   );
 };
 
+
 export function Analysis() {
   const [patientId, setPatientId] = useState<string>('');
   const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
@@ -211,12 +210,7 @@ export function Analysis() {
   const [showInputCard, setShowInputCard] = useState<boolean>(true);
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const [showPdfButton, setShowPdfButton] = useState<boolean>(false);
-  
-  const { toPDF, targetRef } = usePDF({
-    filename: 'eye-analysis-report.pdf',
-    page: { margin: 20 },
-  });
-
+  const { toPDF, targetRef } = usePDF({filename: 'eye-analysis-report.pdf'});
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
   };
@@ -259,7 +253,7 @@ export function Analysis() {
       const data: ApiResponse = await response.json();
       setApiData(data);
       setShowInputCard(false);
-      setShowPdfButton(true);
+      setShowPdfButton(true);  // Show the PDF button after successful API response
     } catch (error) {
       if (error instanceof Error) {
         setError(`An error occurred while processing your request: ${error.message}`);
@@ -341,8 +335,8 @@ export function Analysis() {
               </Card>
             ) : null}
             {apiData && (
-              <>
-                <div className="mb-4 flex justify-between items-center">
+              <div ref={targetRef}>
+                <div className="flex justify-between items-center mb-4">
                   <h2 className="text-2xl font-bold">Eye Analysis Report</h2>
                   {showPdfButton && (
                     <Button
@@ -363,13 +357,7 @@ export function Analysis() {
                   <EyeAnalysisCard eye="Left" data={apiData.left_image_result} />
                   <EyeAnalysisCard eye="Right" data={apiData.right_image_result} />
                 </motion.div>
-                {/* Hidden div for PDF generation */}
-                <div style={{ display: 'none' }}>
-                  <div ref={targetRef}>
-                    <MedicalPDFReport patientId={patientId} apiData={apiData} />
-                  </div>
-                </div>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -378,6 +366,7 @@ export function Analysis() {
   );
 }
 
+// DistortedGlass component (if you want to keep it)
 const DistortedGlass = () => {
   const [isVisible, setIsVisible] = useState(true);
 
