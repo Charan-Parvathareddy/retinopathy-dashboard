@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 import Head from 'next/head';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ import { ArrowRight, Eye, AlertTriangle, Download, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePDF } from 'react-to-pdf';
+import { toPng } from 'html-to-image';
+import jsPDF from 'jspdf';
 
 interface EyeResult {
   predicted_class: number;
@@ -266,26 +268,26 @@ const PDFTemplate = ({
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white">
-      <h1 className="text-2xl font-bold mb-4">Eye Analysis Report</h1>
-      <Separator className="my-4" />
-      <div className="mb-4">
-        <p>
-          <strong>Patient ID:</strong> {patientId}
-        </p>
-        <p>
-          <strong>Report Date:</strong> {formatDate(new Date())}
-        </p>
-      </div>
-      <Separator className="my-4" />
-      {renderEyeAnalysis('Left', leftEyeData)}
-      {renderEyeAnalysis('Right', rightEyeData)}
-      <Separator className="my-4" />
-      <div className="text-sm text-gray-600">
-        <p>This report is generated automatically and should be reviewed by a healthcare professional.</p>
-        <p>For any questions or concerns, please consult with your doctor.</p>
-      </div>
+    <div className="p-6 max-w-4xl mx-auto bg-white" style={{ fontFamily: 'Arial, sans-serif' }}>
+    <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>Eye Analysis Report</h1>
+    <hr style={{ margin: '16px 0' }} />
+    <div style={{ marginBottom: '16px' }}>
+      <p>
+        <strong>Patient ID:</strong> {patientId}
+      </p>
+      <p>
+        <strong>Report Date:</strong> {formatDate(new Date())}
+      </p>
     </div>
+    <hr style={{ margin: '16px 0' }} />
+    {renderEyeAnalysis('Left', leftEyeData)}
+    {renderEyeAnalysis('Right', rightEyeData)}
+    <hr style={{ margin: '16px 0' }} />
+    <div style={{ fontSize: '12px', color: '#666' }}>
+      <p>This report is generated automatically and should be reviewed by a healthcare professional.</p>
+      <p>For any questions or concerns, please consult with your doctor.</p>
+    </div>
+  </div>
   );
 };
 
@@ -302,6 +304,41 @@ export function Analysis() {
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const [showPdfButton, setShowPdfButton] = useState<boolean>(false);
   const { toPDF, targetRef } = usePDF({ filename: 'eye-analysis-report.pdf' });
+
+  const [isPdfReady, setIsPdfReady] = useState(false);
+  const pdfContentRef = useRef(null);
+  
+
+  useEffect(() => {
+    if (apiData) {
+      // Add a small delay to ensure the content is rendered
+      const timer = setTimeout(() => {
+        setIsPdfReady(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [apiData]);
+
+  const handlePDFDownload = async () => {
+    if (pdfContentRef.current && isPdfReady) {
+      const pdfContent = pdfContentRef.current;
+      try {
+        const dataUrl = await toPng(pdfContent, { quality: 0.95 });
+        const pdf = new jsPDF();
+        const imgProps = pdf.getImageProperties(dataUrl);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('eye-analysis-report.pdf');
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        // Optionally, show an error message to the user
+      }
+    } else {
+      console.warn('PDF content is not ready yet');
+      // Optionally, show a message to the user to wait
+    }
+  };
 
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
@@ -364,9 +401,7 @@ export function Analysis() {
     }
   };
 
-  const handlePDFDownload = () => {
-    toPDF(targetRef.current);
-  };
+  
 
   return (
     <>
@@ -435,17 +470,18 @@ export function Analysis() {
                 </CardFooter>
               </Card>
             ) : null}
-            {apiData && (
+             {apiData && (
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-2xl font-bold">Eye Analysis Report</h2>
                   {showPdfButton && (
                     <Button
                       onClick={handlePDFDownload}
+                      disabled={!isPdfReady}
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
                     >
                       <Download className="mr-2" />
-                      Download PDF
+                      {isPdfReady ? 'Download PDF' : 'Preparing PDF...'}
                     </Button>
                   )}
                 </div>
@@ -465,7 +501,7 @@ export function Analysis() {
       </div>
       {/* Hidden div for PDF generation */}
       <div style={{ display: 'none' }}>
-      <div ref={targetRef}>
+        <div ref={pdfContentRef}>
           <PDFTemplate
             patientId={patientId}
             leftEyeData={apiData?.left_image_result}
@@ -527,3 +563,4 @@ const DistortedGlass = () => {
     </AnimatePresence>
   );
 };
+
