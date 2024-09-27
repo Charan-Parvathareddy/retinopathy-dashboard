@@ -268,26 +268,26 @@ const PDFTemplate = ({
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white" style={{ fontFamily: 'Arial, sans-serif' }}>
-    <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>Eye Analysis Report</h1>
-    <hr style={{ margin: '16px 0' }} />
-    <div style={{ marginBottom: '16px' }}>
-      <p>
-        <strong>Patient ID:</strong> {patientId}
-      </p>
-      <p>
-        <strong>Report Date:</strong> {formatDate(new Date())}
-      </p>
+    <div className="p-6 max-w-4xl mx-auto bg-white">
+      <h1 className="text-2xl font-bold mb-4">Eye Analysis Report</h1>
+      <Separator className="my-4" />
+      <div className="mb-4">
+        <p>
+          <strong>Patient ID:</strong> {patientId}
+        </p>
+        <p>
+          <strong>Report Date:</strong> {formatDate(new Date())}
+        </p>
+      </div>
+      <Separator className="my-4" />
+      {renderEyeAnalysis('Left', leftEyeData)}
+      {renderEyeAnalysis('Right', rightEyeData)}
+      <Separator className="my-4" />
+      <div className="text-sm text-gray-600">
+        <p>This report is generated automatically and should be reviewed by a healthcare professional.</p>
+        <p>For any questions or concerns, please consult with your doctor.</p>
+      </div>
     </div>
-    <hr style={{ margin: '16px 0' }} />
-    {renderEyeAnalysis('Left', leftEyeData)}
-    {renderEyeAnalysis('Right', rightEyeData)}
-    <hr style={{ margin: '16px 0' }} />
-    <div style={{ fontSize: '12px', color: '#666' }}>
-      <p>This report is generated automatically and should be reviewed by a healthcare professional.</p>
-      <p>For any questions or concerns, please consult with your doctor.</p>
-    </div>
-  </div>
   );
 };
 
