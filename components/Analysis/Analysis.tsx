@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import Head from 'next/head';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,6 @@ import { ArrowRight, Eye, AlertTriangle, Download, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePDF } from 'react-to-pdf';
-
 interface EyeResult {
   predicted_class: number;
   stage: string;
@@ -198,6 +197,7 @@ const MovingImage = ({ src, alt, isMoving }: { src: string; alt: string; isMovin
   );
 };
 
+
 export function Analysis() {
   const [patientId, setPatientId] = useState<string>('');
   const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
@@ -211,7 +211,6 @@ export function Analysis() {
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const [showPdfButton, setShowPdfButton] = useState<boolean>(false);
   const { toPDF, targetRef } = usePDF({filename: 'eye-analysis-report.pdf'});
-
   const handlePatientIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPatientId(e.target.value);
   };
