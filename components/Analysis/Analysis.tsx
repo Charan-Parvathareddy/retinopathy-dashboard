@@ -462,7 +462,7 @@ export function Analysis() {
     formData.append('right_image', rightEyeImage);
   
     try {
-      const response = await fetch(`https://gnayan-huf2h0hjfxb3efg7.southindia-01.azurewebsites.net/predict/?patient_id=${encodeURIComponent(patientId)}`, {
+      const response = await fetch(`https://drd-backend-endpoint.azurewebsites.net/infer/?patient_id=${encodeURIComponent(patientId)}`, {
         method: 'POST',
         body: formData,
       });
