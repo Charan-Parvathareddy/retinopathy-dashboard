@@ -14,11 +14,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface EyeResult {
   predicted_class: number;
-  stage: string;
+  Stage: string;
   confidence: string;
   explanation: string;
   Note: string | null;
-  Risk: string;
+  Risk_Factor: string;
 }
 
 interface ApiResponse {
@@ -38,10 +38,10 @@ interface ChartDataItem {
 const getTooltipContent = (itemName: string): string => {
   switch (itemName) {
     case 'Prediction Class':
-      return 'The model evaluates and indicates the stage of diabetic retinopathy it has identified in your case.';
+      return 'The model evaluates and indicates the Stage of diabetic retinopathy it has identified in your case.';
     case 'Confidence':
       return 'This shows how sure the model is about its prediction, with a higher number meaning more certainty.';
-    case 'Risk':
+    case 'Risk_Factor':
       return 'This indicates the chance that your condition might get worse over time.';
     default:
       return '';
@@ -58,7 +58,7 @@ const getColorForValue = (value: number, isConfidence: boolean, isPredictionClas
     if (value <= 66) return 'hsl(var(--chart-4))'; // Yellow for Medium
     return 'hsl(var(--chart-1))'; // Green for High
   } else {
-    // For Risk
+    // For Risk_Factor
     if (value <= 33) return 'hsl(var(--chart-1))'; // Green for Low
     if (value <= 66) return 'hsl(var(--chart-4))'; // Yellow for Medium
     return 'hsl(var(--chart-2))'; // Red for High
@@ -119,12 +119,12 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
 };
 
 const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
-  const { stage, confidence, explanation, Risk, predicted_class } = data;
+  const { Stage, confidence, explanation, Risk_Factor, predicted_class } = data;
   const chartData: ChartDataItem[] = [
     {
       name: 'Prediction Class',
       value: predicted_class,
-      displayValue: stage,
+      displayValue: Stage,
       markers: [
         { position: 33, label: 'No DR' },
         { position: 66, label: 'Moderate' },
@@ -145,9 +145,9 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
     },
     
     {
-      name: 'Risk',
-      value: parseFloat(Risk.replace('%', '')),
-      displayValue: Risk,
+      name: 'Risk_Factor',
+      value: parseFloat(Risk_Factor.replace('%', '')),
+      displayValue: Risk_Factor,
       markers: [
         { position: 33, label: 'Low' },
         { position: 66, label: 'Medium' },
@@ -163,7 +163,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
           <Eye className="mr-2" /> {eye} Eye Analysis
         </CardTitle>
         <Separator className="my-3 bg-white/20" />
-        <CardDescription className="text-lg mt-3 font-medium text-white/90">{stage}: {explanation}</CardDescription>
+        <CardDescription className="text-lg mt-3 font-medium text-white/90">{Stage}: {explanation}</CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
         <CustomBarChart data={chartData} />
