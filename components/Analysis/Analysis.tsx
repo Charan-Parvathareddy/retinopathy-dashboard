@@ -168,14 +168,28 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
           <Eye className="mr-2" /> {eye} Eye Analysis
         </CardTitle>
         <Separator className="my-3 bg-white/20" />
-        <CardDescription className="text-lg mt-3 font-medium text-white/90">{Stage}: {explanation}</CardDescription>
+        <CardDescription className="text-lg mt-3 font-medium text-white/90">
+          {Stage.split('\n').map((line, index) => (
+            <React.Fragment key={index}>
+              {line}
+              <br />
+            </React.Fragment>
+          ))}
+        </CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
         <CustomBarChart data={chartData} />
       </CardContent>
       <CardFooter className="flex flex-col items-start border-t p-4 bg-gray-50">
         <div className="text-sm font-medium mb-1 text-gray-700">Note:</div>
-        <div className="text-sm text-muted-foreground">{data.Note}</div>
+        <div className="text-sm text-muted-foreground">
+          {explanation.split('\n').map((line, index) => (
+            <React.Fragment key={index}>
+              {line}
+              <br />
+            </React.Fragment>
+          ))}
+        </div>
       </CardFooter>
     </Card>
   );
