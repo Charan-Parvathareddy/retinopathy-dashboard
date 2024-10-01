@@ -149,7 +149,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
       isConfidence: true
     },
     {
-      name: 'Risk_Factor',
+      name: 'Risk',
       value: Risk_Factor,
       displayValue: `${Risk_Factor.toFixed(2)}%`,
       markers: [
