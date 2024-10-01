@@ -51,7 +51,7 @@ const getColorForValue = (value: number, isConfidence: boolean, isPredictionClas
   if (isPredictionClass) {
     switch (value) {
       case 0: return 'hsl(120, 100%, 35%)'; // Green for No DR
-      case 1: return 'hsl(60, 100%, 35%)';  // Yellow for Moderate DR
+      case 1: return 'hsl(60, 81.81818181818183%, 65.49019607843137%)';  // Yellow for Moderate DR
       case 2: return 'hsl(30, 100%, 50%)';  // Orange for Severe DR
       case 3: return 'hsl(0, 100%, 50%)';   // Red for Proliferative DR
       default: return 'hsl(0, 0%, 50%)';    // Gray for unknown
@@ -63,7 +63,7 @@ const getColorForValue = (value: number, isConfidence: boolean, isPredictionClas
   } else {
     // For Risk_Factor
     if (value <= 25) return 'hsl(120, 100%, 35%)';  // Green for Low
-    if (value <= 50) return 'hsl(60, 100%, 35%)';   // Yellow for Medium-Low
+    if (value <= 50) return 'hsl(60, 81.81818181818183%, 65.49019607843137%)';   // Yellow for Medium-Low
     if (value <= 75) return 'hsl(30, 100%, 50%)';   // Orange for Medium-High
     return 'hsl(0, 100%, 50%)';                     // Red for High
   }
