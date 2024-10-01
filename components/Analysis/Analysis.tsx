@@ -49,21 +49,25 @@ const getTooltipContent = (itemName: string): string => {
 
 const getColorForValue = (value: number, isConfidence: boolean, isPredictionClass: boolean): string => {
   if (isPredictionClass) {
-    if (value <= 0) return 'hsl(var(--chart-1))'; // Green for No DR
-    if (value <= 1) return 'hsl(var(--chart-4))'; // Yellow for Moderate
-    return 'hsl(var(--chart-2))'; // Red for Severe
+    switch (value) {
+      case 0: return 'hsl(120, 100%, 35%)'; // Green for No DR
+      case 1: return 'hsl(60, 100%, 35%)';  // Yellow for Moderate DR
+      case 2: return 'hsl(30, 100%, 50%)';  // Orange for Severe DR
+      case 3: return 'hsl(0, 100%, 50%)';   // Red for Proliferative DR
+      default: return 'hsl(0, 0%, 50%)';    // Gray for unknown
+    }
   } else if (isConfidence) {
-    if (value <= 33) return 'hsl(var(--chart-2))'; // Red for Low
-    if (value <= 66) return 'hsl(var(--chart-4))'; // Yellow for Medium
-    return 'hsl(var(--chart-1))'; // Green for High
+    if (value <= 33) return 'hsl(0, 100%, 50%)';    // Red for Low
+    if (value <= 66) return 'hsl(30, 100%, 50%)';   // Orange for Medium
+    return 'hsl(120, 100%, 35%)';                   // Green for High
   } else {
     // For Risk_Factor
-    if (value <= 33) return 'hsl(var(--chart-1))'; // Green for Low
-    if (value <= 66) return 'hsl(var(--chart-4))'; // Yellow for Medium
-    return 'hsl(var(--chart-2))'; // Red for High
+    if (value <= 25) return 'hsl(120, 100%, 35%)';  // Green for Low
+    if (value <= 50) return 'hsl(60, 100%, 35%)';   // Yellow for Medium-Low
+    if (value <= 75) return 'hsl(30, 100%, 50%)';   // Orange for Medium-High
+    return 'hsl(0, 100%, 50%)';                     // Red for High
   }
 };
-
 const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
   return (
     <div className="space-y-6">
@@ -95,18 +99,18 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
             <motion.div
               className="h-5 rounded-full transition-all duration-500 ease-in-out"
               style={{
-                width: `${item.isPredictionClass ? ((item.value + 1) / 3) * 100 : item.value}%`,
+                width: `${item.isPredictionClass ? ((item.value + 1) / 4) * 100 : item.value}%`,
                 backgroundColor: getColorForValue(item.value, item.isConfidence || false, item.isPredictionClass || false),
               }}
               initial={{ width: 0 }}
-              animate={{ width: `${item.isPredictionClass ? ((item.value + 1) / 3) * 100 : item.value}%` }}
+              animate={{ width: `${item.isPredictionClass ? ((item.value + 1) / 4) * 100 : item.value}%` }}
               transition={{ duration: 0.5, delay: 0.2 }}
             />
           </div>
           {item.markers && (
             <div className="flex justify-between mt-2 text-xs text-gray-500">
               {item.markers.map((marker, idx) => (
-                <div key={idx} className="text-center" style={{ width: '33.33%' }}>
+                <div key={idx} className="text-center" style={{ width: '25%' }}>
                   {marker.label}
                 </div>
               ))}
@@ -126,9 +130,10 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
       value: predicted_class,
       displayValue: Stage,
       markers: [
-        { position: 33, label: 'No DR' },
-        { position: 66, label: 'Moderate' },
-        { position: 100, label: 'Severe' },
+        { position: 25, label: 'No DR' },
+        { position: 50, label: 'Moderate' },
+        { position: 75, label: 'Severe' },
+        { position: 100, label: 'Proliferative' },
       ],
       isPredictionClass: true
     },
@@ -148,9 +153,10 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
       value: Risk_Factor,
       displayValue: `${Risk_Factor.toFixed(2)}%`,
       markers: [
-        { position: 33, label: 'Low' },
-        { position: 66, label: 'Medium' },
-        { position: 100, label: 'High' },
+        { position: 25, label: 'Low' },
+        { position: 50, label: 'Medium' },
+        { position: 75, label: 'High' },
+        { position: 100, label: 'Very High' },
       ]
     },
   ];
