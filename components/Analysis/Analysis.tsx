@@ -7,23 +7,22 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
-import { ArrowRight, Eye, AlertTriangle } from 'lucide-react';
+import { ArrowRight, Eye, AlertTriangle, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface EyeResult {
   predicted_class: number;
-  Stage: string;
-  confidence: string;
+  confidence: number;
   explanation: string;
-  Note: string | null;
-  Risk_Factor: string;
+  Risk_Factor: number;
+  Stage: string;
+  Note: string;
 }
 
 interface ApiResponse {
-  left_image_result: EyeResult;
-  right_image_result: EyeResult;
+  left_eye: EyeResult;
+  right_eye: EyeResult;
 }
 
 interface ChartDataItem {
@@ -64,6 +63,7 @@ const getColorForValue = (value: number, isConfidence: boolean, isPredictionClas
     return 'hsl(var(--chart-2))'; // Red for High
   }
 };
+
 const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
   return (
     <div className="space-y-6">
@@ -76,7 +76,7 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
           transition={{ duration: 0.5 }}
         >
           <div className="flex justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700 flex items-center">
+            <span className="text-sm font-medium text-gray-700 flex items-center">
               {item.name}
               <TooltipProvider>
                 <Tooltip>
@@ -134,8 +134,8 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
     },
     {
       name: 'Confidence',
-      value: parseFloat(confidence.replace('%', '')),
-      displayValue: confidence,
+      value: confidence,
+      displayValue: `${confidence.toFixed(2)}%`,
       markers: [
         { position: 33, label: 'Low' },
         { position: 66, label: 'Medium' },
@@ -143,11 +143,10 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
       ],
       isConfidence: true
     },
-    
     {
       name: 'Risk_Factor',
-      value: parseFloat(Risk_Factor.replace('%', '')),
-      displayValue: Risk_Factor,
+      value: Risk_Factor,
+      displayValue: `${Risk_Factor.toFixed(2)}%`,
       markers: [
         { position: 33, label: 'Low' },
         { position: 66, label: 'Medium' },
@@ -176,163 +175,6 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
   );
 };
 
-
-const START_GRADIENT_POSITION = -130;
-const END_GRADIENT_POSITION = 210;
-const MAX_GRADIENT_Y = 216 - 80;
-const GRADIENT_MOVE_INTERVAL = 10;
-const GLOWING_LINE_HEIGHT = 81;
-const GLOW_COLOR = "#ace5f4";
-
-type SVGLineGlowAnimateProps = {
-  movementDelay?: number;
-  id: number;
-  additionalHeight?: number;
-  initialGradientY?: number;
-};
-
-const SVGLineGlowAnimate: React.FC<SVGLineGlowAnimateProps> = ({
-  movementDelay = 0,
-  id,
-  additionalHeight = 0,
-  initialGradientY = 0,
-}) => {
-  const svgHeight = 228 + additionalHeight;
-  const [gradientPosition, setGradientPosition] = useState({
-    y1: START_GRADIENT_POSITION,
-    y2: END_GRADIENT_POSITION,
-  });
-  const [opacity, setOpacity] = useState(0);
-
-  React.useEffect(() => {
-    const totalDistance = svgHeight - GLOWING_LINE_HEIGHT;
-    const halfDistance = totalDistance / 2;
-
-    const moveGradient = () => {
-      setGradientPosition((prev) => {
-        const newY1 = prev.y1 + 1;
-        const newY2 = prev.y2 + 1;
-
-        const distanceTravelled = newY1 - START_GRADIENT_POSITION;
-        let newOpacity = 0;
-
-        if (distanceTravelled <= halfDistance) {
-          newOpacity = distanceTravelled / halfDistance;
-        } else {
-          newOpacity = 1 - (distanceTravelled - halfDistance) / halfDistance;
-        }
-
-        setOpacity(newOpacity);
-
-        if (newY1 > MAX_GRADIENT_Y - GLOWING_LINE_HEIGHT) {
-          return {
-            y1: START_GRADIENT_POSITION,
-            y2: END_GRADIENT_POSITION,
-          };
-        }
-        return {
-          y1: newY1,
-          y2: newY2,
-        };
-      });
-    };
-
-    const startTimeout = setTimeout(() => {
-      const interval = setInterval(moveGradient, GRADIENT_MOVE_INTERVAL);
-      return () => clearInterval(interval);
-    }, movementDelay);
-
-    return () => {
-      clearTimeout(startTimeout);
-      setOpacity(0);
-    };
-  }, [movementDelay, svgHeight]);
-
-  return (
-    <svg
-      width="12"
-      height={svgHeight}
-      viewBox={`0 0 12 ${svgHeight}`}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path id={`main-line-${id}`} d={`M6 ${svgHeight} L6 0`}></path>
-
-      <use
-        href={`#main-line-${id}`}
-        opacity={opacity}
-        stroke={`url(#gradient-glow-${id})`}
-        strokeWidth="6"
-        style={{
-          filter: `blur(2px) drop-shadow(0px 0px 2px ${GLOW_COLOR})`,
-          transition: `opacity ${GRADIENT_MOVE_INTERVAL}ms linear`,
-        }}
-      />
-
-      <use
-        href={`#main-line-${id}`}
-        stroke={`url(#gradient-solid-${id})`}
-        strokeWidth="2"
-      />
-
-      <defs>
-        <linearGradient
-          id={`gradient-glow-${id}`}
-          x1="6"
-          y1={gradientPosition.y1}
-          x2="6"
-          y2={gradientPosition.y2}
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0.38" stopColor={GLOW_COLOR} stopOpacity="0"></stop>
-          <stop offset="0.5" stopColor={GLOW_COLOR} stopOpacity="0.8"></stop>
-          <stop offset="0.62" stopColor={GLOW_COLOR} stopOpacity="0"></stop>
-        </linearGradient>
-
-        <linearGradient
-          id={`gradient-solid-${id}`}
-          x1="6"
-          y1={initialGradientY}
-          x2="6"
-          y2={svgHeight}
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor={GLOW_COLOR} stopOpacity="0"></stop>
-          <stop offset="0.5" stopColor={GLOW_COLOR}></stop>
-          <stop offset="1" stopColor={GLOW_COLOR} stopOpacity="0"></stop>
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-};
-
-const GlowingLineGrid = () => {
-  return (
-    <div className="absolute inset-0 z-20 pointer-events-none">
-      <div className="w-full h-full grid grid-cols-64 grid-rows-8">
-        {[...Array(512)].map((_, index) => (
-          <div key={index} className="flex items-center justify-center">
-            <SVGLineGlowAnimate 
-              movementDelay={index * 200} 
-              id={index} 
-              additionalHeight={
-                index % 64 === 1 || index % 64 === 2 || index % 64 === 5 || index % 64 === 6 ? 20 : 0
-              } 
-              initialGradientY={
-                index % 64 === 0 || index % 64 === 3 || index % 64 === 4 || index % 64 === 7 ? 20 : 0
-              }
-            />
-          </div>
-        ))}
-
-        {/* Center horizontal line */}
-      
-        </div>
-    </div>
-  );
-};
-
-
 const DistortedGlass = () => {
   const [isVisible, setIsVisible] = useState(true);
 
@@ -355,7 +197,6 @@ const DistortedGlass = () => {
           className="absolute inset-0 z-10 overflow-hidden"
         >
           <div className="glass-effect h-full w-full" />
-          <GlowingLineGrid />
         </motion.div>
       )}
       <svg className="hidden">
@@ -416,8 +257,6 @@ const MovingImage = ({ src, alt, isMoving }: { src: string; alt: string; isMovin
     </motion.div>
   );
 };
-
-
 
 export function Analysis() {
   const [patientId, setPatientId] = useState<string>('');
@@ -492,10 +331,10 @@ export function Analysis() {
         <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
       </Head>
       <div className="min-h-screen w-full dark:bg-black bg-white dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative flex items-center justify-center">
-      <div className="flex-1 p-6">
-      <div className="max-w-6xl mx-auto">
-        {showInputCard ? (
-        <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <div className="flex-1 p-6">
+          <div className="max-w-6xl mx-auto">
+            {showInputCard ? (
+              <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <CardHeader className="bg-gradient">
                   <CardTitle className="text-xl font-semibold">Diabetic Retinopathy Report Generator</CardTitle>
                 </CardHeader>
@@ -551,25 +390,31 @@ export function Analysis() {
                     </motion.div>
                   )}
                 </CardFooter>
-               
-        </Card>
-        ) : null}
-    {apiData && (
+              </Card>
+            ) : null}
+            {apiData && (
               <motion.div 
                 className="grid grid-cols-1 md:grid-cols-2 gap-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <EyeAnalysisCard eye="Left" data={apiData.left_image_result} />
-                <EyeAnalysisCard eye="Right" data={apiData.right_image_result} />
+                <EyeAnalysisCard eye="Left" data={apiData.left_eye} />
+                <EyeAnalysisCard eye="Right" data={apiData.right_eye} />
               </motion.div>
             )}
           </div>
-        
-       </div>
-    </div>
-    
+        </div>
+      </div>
     </>
+  );
+}
+
+// You might want to add this component to your page or wrap it in a layout component
+export default function AnalysisPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
+      <Analysis />
+    </div>
   );
 }
