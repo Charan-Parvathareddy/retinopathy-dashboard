@@ -7,9 +7,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/file-upload";
 import Image from 'next/image';
-import { ArrowRight, Eye, AlertTriangle, Info } from 'lucide-react';
+import { ArrowRight, Eye, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import ErrorModal from '@/components/Analysis/ErrorModal';
 
 interface EyeResult {
   predicted_class: number;
@@ -21,8 +22,10 @@ interface EyeResult {
 }
 
 interface ApiResponse {
-  left_eye: EyeResult;
-  right_eye: EyeResult;
+  left_eye?: EyeResult;
+  right_eye?: EyeResult;
+  message?: string;
+  error?: string;
 }
 
 interface ChartDataItem {
@@ -68,6 +71,7 @@ const getColorForValue = (value: number, isConfidence: boolean, isPredictionClas
     return 'hsl(0, 100%, 50%)';                     // Red for High
   }
 };
+
 const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
   return (
     <div className="space-y-6">
@@ -307,31 +311,55 @@ export function Analysis() {
   };
 
   const handleSubmit = async () => {
+    // Validate inputs
     if (!patientId || !leftEyeImage || !rightEyeImage) {
       setError('Please fill in all fields and upload both eye images.');
       return;
     }
-  
+
     setIsLoading(true);
     setError(null);
     setIsMoving(true);
-  
+
     const formData = new FormData();
     formData.append('left_image', leftEyeImage);
     formData.append('right_image', rightEyeImage);
-  
+
     try {
       const response = await fetch(`https://backend-drd.azurewebsites.net/infer/?patient_id=${encodeURIComponent(patientId)}`, {
         method: 'POST',
         body: formData,
       });
+
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
       }
-  
+
       const data: ApiResponse = await response.json();
-      setApiData(data);
-      setShowInputCard(false);
+
+      // Check for specific message about invalid images
+      if (data.message) {
+        setError(data.message);
+        setIsLoading(false);
+        setIsMoving(false);
+        return;
+      }
+
+      // Check for general error
+      if (data.error) {
+        setError(data.error);
+        setIsLoading(false);
+        setIsMoving(false);
+        return;
+      }
+
+      // If we have eye results, proceed to show analysis
+      if (data.left_eye && data.right_eye) {
+        setApiData(data);
+        setShowInputCard(false);
+      } else {
+        setError('Unexpected response format. Please try again.');
+      }
     } catch (error) {
       if (error instanceof Error) {
         setError(`An error occurred while processing your request: ${error.message}`);
@@ -399,16 +427,6 @@ export function Analysis() {
                     {isLoading ? 'Analyzing...' : 'Submit Analysis'}
                     {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
                   </Button>
-                  {error && (
-                    <motion.div 
-                      className="text-red-500 mt-2 flex items-center"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <AlertTriangle className="mr-2" /> {error}
-                    </motion.div>
-                  )}
                 </CardFooter>
               </Card>
             ) : null}
@@ -419,18 +437,22 @@ export function Analysis() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <EyeAnalysisCard eye="Left" data={apiData.left_eye} />
-                <EyeAnalysisCard eye="Right" data={apiData.right_eye} />
+                <EyeAnalysisCard eye="Left" data={apiData.left_eye!} />
+                <EyeAnalysisCard eye="Right" data={apiData.right_eye!} />
               </motion.div>
             )}
           </div>
         </div>
       </div>
+      <ErrorModal
+        isOpen={!!error}
+        onClose={() => setError(null)}
+        errorMessage={error || ''}
+      />
     </>
   );
 }
 
-// You might want to add this component to your page or wrap it in a layout component
 export default function AnalysisPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
@@ -438,3 +460,4 @@ export default function AnalysisPage() {
     </div>
   );
 }
+
