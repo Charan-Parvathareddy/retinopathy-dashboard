@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowRight, Eye, Info } from 'lucide-react';
 
@@ -262,7 +262,7 @@ const MovingImage = ({ src, alt, isMoving, isAnalyzing }: { src: string; alt: st
 };
 
 export function Analysis() {
-  const router = useRouter();
+  // const router = useRouter();
   const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
   const [rightEyeImage, setRightEyeImage] = useState<File | null>(null);
   const [leftEyePreview, setLeftEyePreview] = useState<string | null>(null);
