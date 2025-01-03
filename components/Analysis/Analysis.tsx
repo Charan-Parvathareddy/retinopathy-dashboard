@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowRight, Eye, Info } from 'lucide-react';
 
@@ -16,6 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import ErrorModal from '@/components/Analysis/ErrorModal';
 import ModelRender from '@/components/Analysis/model-render';
 import Benefits from '@/components/Analysis/Benefits';
+import { FeedbackModal } from '@/components/Analysis/FeedbackModal';
 
 interface EyeResult {
   predicted_class: number;
@@ -40,6 +42,33 @@ interface ChartDataItem {
   markers?: { position: number; label: string }[];
   isConfidence?: boolean;
   isPredictionClass?: boolean;
+}
+
+interface FeedbackData {
+  patient_id: string;
+  email_id: string;
+  left_eye: {
+    predicted_class: number;
+    Stage: string;
+    confidence: number;
+    explanation: string;
+    Note: string;
+    Risk_Factor: number;
+    feedback: string;
+    doctors_diagnosis: string;
+    review: string;
+  };
+  right_eye: {
+    predicted_class: number;
+    Stage: string;
+    confidence: number;
+    explanation: string;
+    Note: string;
+    Risk_Factor: number;
+    feedback: string;
+    doctors_diagnosis: string;
+    review: string;
+  };
 }
 
 const getTooltipContent = (itemName: string): string => {
@@ -156,8 +185,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
         { position: 100, label: 'High' },
       ],
       isConfidence: true
-    },
-    {
+    },{
       name: 'Risk',
       value: Risk_Factor,
       displayValue: `${Risk_Factor.toFixed(2)}%`,
@@ -234,6 +262,7 @@ const MovingImage = ({ src, alt, isMoving, isAnalyzing }: { src: string; alt: st
 };
 
 export function Analysis() {
+  const router = useRouter();
   const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
   const [rightEyeImage, setRightEyeImage] = useState<File | null>(null);
   const [leftEyePreview, setLeftEyePreview] = useState<string | null>(null);
@@ -247,6 +276,8 @@ export function Analysis() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalPatientId, setModalPatientId] = useState<string>('');
   const [showBenefits, setShowBenefits] = useState<boolean>(true);
+  const [showFeedbackModal, setShowFeedbackModal] = useState<boolean>(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
 
   const handleImageUpload = (file: File | null, eye: 'left' | 'right') => {
     if (file) {
@@ -325,6 +356,79 @@ export function Analysis() {
       setIsMoving(false);
       setIsAnalyzing(false);
     }
+  };
+
+  const handleFeedbackSubmit = async (feedbackData: FeedbackData) => {
+    console.log('Preparing to submit feedback...');
+
+    const payload = {
+      patient_id: modalPatientId,
+      email_id: "xxyy_hospital@gmail.com",
+      left_eye: {
+        ...apiData?.left_eye,
+        feedback: feedbackData.left_eye.feedback,
+        doctors_diagnosis: feedbackData.left_eye.doctors_diagnosis,
+        review: feedbackData.left_eye.review
+      },
+      right_eye: {
+        ...apiData?.right_eye,
+        feedback: feedbackData.right_eye.feedback,
+        doctors_diagnosis: feedbackData.right_eye.doctors_diagnosis,
+        review: feedbackData.right_eye.review
+      }
+    };
+
+    console.log('Feedback payload:', JSON.stringify(payload, null, 2));
+
+    try {
+      console.log('Initiating API call to submit_feedback endpoint...');
+      console.log('API URL:', 'https://gnayana.azurewebsites.net/submit_feedback/');
+      console.log('HTTP Method:', 'POST');
+      console.log('Request Headers:', JSON.stringify({
+        'Content-Type': 'application/json',
+      }, null, 2));
+
+      const response = await fetch('https://gnayana.azurewebsites.net/submit_feedback/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      console.log('API call completed.');
+      console.log('Response status:', response.status);
+      console.log('Response status text:', response.statusText);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      console.log('API Response data:', JSON.stringify(responseData, null, 2));
+
+      console.log('Feedback submitted successfully');
+      setShowFeedbackModal(false);
+      setFeedbackSubmitted(true);
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+      }
+      setError('Failed to submit feedback. Please try again.');
+    }
+  };
+
+  const handleGoBack = () => {
+    setShowInputCard(true);
+    setShowBenefits(true);
+    setApiData(null);
+    setLeftEyeImage(null);
+    setRightEyeImage(null);
+    setLeftEyePreview(null);
+    setRightEyePreview(null);
+    setModalPatientId('');
+    setFeedbackSubmitted(false);
   };
 
   return (
@@ -431,12 +535,21 @@ export function Analysis() {
               <Benefits />
             ) : (
               <div className="flex justify-center mt-8">
-                <Button
-                  onClick={() => window.location.reload()}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
-                >
-                  Go Back
-                </Button>
+                {!feedbackSubmitted ? (
+                  <Button
+                    onClick={() => setShowFeedbackModal(true)}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+                  >
+                    Give Feedback
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleGoBack}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+                  >
+                    Go Back
+                  </Button>
+                )}
               </div>
             )}
           </div>
@@ -462,6 +575,30 @@ export function Analysis() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        leftEyePreview={leftEyePreview || ''}
+        rightEyePreview={rightEyePreview || ''}
+        onSubmitFeedback={handleFeedbackSubmit}
+        patientId={modalPatientId}
+        leftEyeData={apiData?.left_eye || {
+          predicted_class: 0,
+          Stage: "",
+          confidence: 0,
+          explanation: "",
+          Note: "",
+          Risk_Factor: 0
+        }}
+        rightEyeData={apiData?.right_eye || {
+          predicted_class: 0,
+          Stage: "",
+          confidence: 0,
+          explanation: "",
+          Note: "",
+          Risk_Factor: 0
+        }}
+      />
       <ErrorModal
         isOpen={!!error}
         onClose={() => setError(null)}

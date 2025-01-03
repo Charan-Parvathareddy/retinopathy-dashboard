@@ -10,7 +10,7 @@ export const { styled, getCssText, theme, config } = createStitches({
     colors: {
       /** App */
       rootBackground: '#181923',
-      tileUrl: 'url("/tile_dark.png")',
+      
       navigationBarBackground: 'rgba(153, 250, 255, .04)',
       navigationBarIcon: '$yellow1',
 
