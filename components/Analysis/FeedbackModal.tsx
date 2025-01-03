@@ -107,11 +107,12 @@ export function FeedbackModal({
                 variant="outline"
                 size="sm"
                 onClick={() => setLeftEyeReview('positive')}
-                className={`${
-                  leftEyeReview === 'positive' 
-                    ? 'bg-green-600 text-white border-green-600' 
-                    : 'text-white border-gray-400 hover:bg-green-600/20'
-                }`}
+                className={`
+                  ${leftEyeReview === 'positive' 
+                    ? 'bg-green-500 text-white border-green-500 shadow-[0_0_10px_#4ade80]' 
+                    : 'bg-transparent text-[#4ade80] border-[#4ade80]'}
+                  transition-colors duration-200
+                `}
               >
                 <ThumbsUp className="mr-2 h-4 w-4" />
                 Positive
@@ -120,11 +121,12 @@ export function FeedbackModal({
                 variant="outline"
                 size="sm"
                 onClick={() => setLeftEyeReview('negative')}
-                className={`${
-                  leftEyeReview === 'negative' 
-                    ? 'bg-red-600 text-white border-red-600' 
-                    : 'text-white border-gray-400 hover:bg-red-600/20'
-                }`}
+                className={`
+                  ${leftEyeReview === 'negative' 
+                    ? 'bg-red-500 text-white border-red-500 shadow-[0_0_10px_#f87171]' 
+                    : 'bg-transparent text-[#f87171] border-[#f87171]'}
+                  transition-colors duration-200
+                `}
               >
                 <ThumbsDown className="mr-2 h-4 w-4" />
                 Negative
@@ -160,11 +162,12 @@ export function FeedbackModal({
                 variant="outline"
                 size="sm"
                 onClick={() => setRightEyeReview('positive')}
-                className={`${
-                  rightEyeReview === 'positive' 
-                    ? 'bg-green-600 text-white border-green-600' 
-                    : 'text-white border-gray-400 hover:bg-green-600/20'
-                }`}
+                className={`
+                  ${rightEyeReview === 'positive' 
+                    ? 'bg-green-500 text-white border-green-500 shadow-[0_0_10px_#4ade80]' 
+                    : 'bg-transparent text-[#4ade80] border-[#4ade80]'}
+                  transition-colors duration-200
+                `}
               >
                 <ThumbsUp className="mr-2 h-4 w-4" />
                 Positive
@@ -173,11 +176,12 @@ export function FeedbackModal({
                 variant="outline"
                 size="sm"
                 onClick={() => setRightEyeReview('negative')}
-                className={`${
-                  rightEyeReview === 'negative' 
-                    ? 'bg-red-600 text-white border-red-600' 
-                    : 'text-white border-gray-400 hover:bg-red-600/20'
-                }`}
+                className={`
+                  ${rightEyeReview === 'negative' 
+                    ? 'bg-red-500 text-white border-red-500 shadow-[0_0_10px_#f87171]' 
+                    : 'bg-transparent text-[#f87171] border-[#f87171]'}
+                  transition-colors duration-200
+                `}
               >
                 <ThumbsDown className="mr-2 h-4 w-4" />
                 Negative
