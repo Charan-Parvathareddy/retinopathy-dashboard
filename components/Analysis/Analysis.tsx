@@ -364,7 +364,7 @@ export function Analysis() {
 
     const payload = {
       patient_id: modalPatientId,
-      email_id: "xxyy_hospital@gmail.com",
+      email_id: "iscs-client_hospital@gmail.com",
       left_eye: {
         ...apiData?.left_eye,
         feedback: feedbackData.left_eye.feedback,
@@ -610,7 +610,7 @@ export function Analysis() {
       <ReportModal
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
-        onSubmit={handleReportSubmit}
+        
         patientId={modalPatientId}
         leftEyeImage={leftEyePreview}
         rightEyeImage={rightEyePreview}

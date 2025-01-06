@@ -9,7 +9,6 @@ import { usePDF } from 'react-to-pdf';
 interface ReportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { type: "email" | "whatsapp"; value: string }) => Promise<void>;
   patientId: string;
   leftEyeImage: string | null;
   rightEyeImage: string | null;
@@ -29,7 +28,6 @@ interface EyeData {
 export function ReportModal({
   isOpen,
   onClose,
-  onSubmit,
   patientId,
   leftEyeImage,
   rightEyeImage,
