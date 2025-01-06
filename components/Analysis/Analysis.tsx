@@ -439,13 +439,7 @@ export function Analysis() {
     setShowReportModal(true);
   };
 
-  const handleReportSubmit = async (data: { type: 'email' | 'whatsapp', value: string }) => {
-    if (data.type === 'email') {
-      await sendEmail(data.value);
-    } else {
-      await sendWhatsapp(data.value);
-    }
-  };
+  
 
   const sendEmail = async (email: string) => {
     // TODO: Implement email sending logic
