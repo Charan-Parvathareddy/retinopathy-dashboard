@@ -441,15 +441,7 @@ export function Analysis() {
 
   
 
-  const sendEmail = async (email: string) => {
-    // TODO: Implement email sending logic
-    console.log(`Sending report to email: ${email}`);
-  };
-
-  const sendWhatsapp = async (phoneNumber: string) => {
-    // TODO: Implement WhatsApp sending logic
-    console.log(`Sending report to WhatsApp: ${phoneNumber}`);
-  };
+  
 
   return (
     <>
