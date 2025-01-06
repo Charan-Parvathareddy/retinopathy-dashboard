@@ -18,6 +18,7 @@ import ErrorModal from '@/components/Analysis/ErrorModal';
 import ModelRender from '@/components/Analysis/model-render';
 import Benefits from '@/components/Analysis/Benefits';
 import { FeedbackModal } from '@/components/Analysis/FeedbackModal';
+import { ReportModal } from '@/components/Analysis/ReportModal';
 
 interface EyeResult {
   predicted_class: number;
@@ -430,6 +431,31 @@ export function Analysis() {
     setModalPatientId('');
     setFeedbackSubmitted(false);
   };
+  const [showReportModal, setShowReportModal] = useState(false);
+
+  // ... (previous functions)
+
+  const handleGetReport = () => {
+    setShowReportModal(true);
+  };
+
+  const handleReportSubmit = async (data: { type: 'email' | 'whatsapp', value: string }) => {
+    if (data.type === 'email') {
+      await sendEmail(data.value);
+    } else {
+      await sendWhatsapp(data.value);
+    }
+  };
+
+  const sendEmail = async (email: string) => {
+    // TODO: Implement email sending logic
+    console.log(`Sending report to email: ${email}`);
+  };
+
+  const sendWhatsapp = async (phoneNumber: string) => {
+    // TODO: Implement WhatsApp sending logic
+    console.log(`Sending report to WhatsApp: ${phoneNumber}`);
+  };
 
   return (
     <>
@@ -534,21 +560,27 @@ export function Analysis() {
             {showBenefits ? (
               <Benefits />
             ) : (
-              <div className="flex justify-center mt-8">
-                {!feedbackSubmitted ? (
-                  <Button
-                    onClick={() => setShowFeedbackModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
-                  >
-                    Give Feedback
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleGoBack}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
-                  >
-                    Go Back
-                  </Button>
+              <div className="flex justify-center mt-8 space-x-4">
+              <Button
+            onClick={handleGetReport}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+          >
+            Get Report
+          </Button>
+          {!feedbackSubmitted ? (
+            <Button
+              onClick={() => setShowFeedbackModal(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+            >
+              Give Feedback
+            </Button>
+          ) : (
+            <Button
+              onClick={handleGoBack}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+            >
+              Go Back
+            </Button>
                 )}
               </div>
             )}
@@ -575,6 +607,16 @@ export function Analysis() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        onSubmit={handleReportSubmit}
+        patientId={modalPatientId}
+        leftEyeImage={leftEyePreview}
+        rightEyeImage={rightEyePreview}
+        leftEyeData={apiData?.left_eye}
+        rightEyeData={apiData?.right_eye}
+      />
       <FeedbackModal
         isOpen={showFeedbackModal}
         onClose={() => setShowFeedbackModal(false)}
